@@ -61,6 +61,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
@@ -98,7 +102,7 @@
             gap: 12px;
         }
 
-        .sidebar-toggle,
+        /* Hanya tombol mobile yang tersisa */
         .sidebar-toggle-mobile {
             background: none;
             border: none;
@@ -112,15 +116,16 @@
             width: 40px;
             height: 40px;
             border-radius: 8px;
+            display: none;
         }
 
-        .sidebar-toggle:hover,
         .sidebar-toggle-mobile:hover {
             background-color: rgba(37, 99, 235, 0.1);
             color: var(--primary-color);
         }
 
-        .sidebar-toggle-mobile {
+        /* Hilangkan button sidebar-toggle desktop */
+        .sidebar-toggle {
             display: none;
         }
 
@@ -322,14 +327,18 @@
         /* --- Sidebar --- */
         #sidebar {
             background: var(--sidebar-bg);
-            min-height: 100vh;
+            height: 100vh;
             width: var(--sidebar-width);
             position: fixed;
+            top: 0;
+            left: 0;
             transition: all 0.3s ease;
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
             z-index: 1020;
             overflow-y: auto;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         #sidebar.collapsed {
@@ -342,6 +351,7 @@
             transition: all 0.3s ease;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .sidebar-header:hover {
@@ -672,11 +682,8 @@
             }
 
             .top-navbar,
-            main {
-                left: 0;
-            }
-
             .top-navbar.compact,
+            main,
             main.compact {
                 left: 0;
                 margin-left: 0;
@@ -781,6 +788,18 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-secondary);
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
     </style>
 
@@ -971,9 +990,6 @@
                 <button class="sidebar-toggle-mobile" id="mobileSidebarToggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
 
             <div class="top-navbar-right">
@@ -1056,7 +1072,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
             const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
             const topNavbar = document.getElementById('topNavbar');
@@ -1080,14 +1095,7 @@
             updateTime();
             setInterval(updateTime, 1000);
 
-            // Sidebar toggle
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-                topNavbar.classList.toggle('compact');
-                mainContent.classList.toggle('compact');
-            });
-
-            // Mobile sidebar toggle
+            // Mobile sidebar toggle (slide in/out overlay)
             mobileSidebarToggle.addEventListener('click', () => {
                 sidebar.classList.add('show');
                 sidebarOverlay.classList.add('show');

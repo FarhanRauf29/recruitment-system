@@ -17,9 +17,7 @@
                             @csrf
 
                             <div class="row">
-                                <!-- Kolom Kiri -->
                                 <div class="col-md-6">
-                                    <!-- Data Diri -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-id-card"></i>
@@ -127,12 +125,14 @@
                                                 <label>Nomor Handphone <span class="text-danger">*</span></label>
                                                 <div class="input-icon">
                                                     <i class="fas fa-phone"></i>
-                                                    <input type="tel" name="nomor_handphone"
+                                                    <input type="text" name="nomor_handphone"
                                                         class="form-control @error('nomor_handphone') is-invalid @enderror"
-                                                        value="{{ old('nomor_handphone') }}" placeholder="081234567890"
-                                                        required>
+                                                        value="{{ old('nomor_handphone') }}"
+                                                        onkeypress="return onlyNumber(event)"
+                                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                                        maxlength="13" minlength="11" required>
                                                 </div>
-                                                <small class="text-muted">Bukan nomor whatsapp?</small>
+                                                <small class="text-muted">Minimal 11 digit & maksimal 13 digit</small>
                                                 @error('nomor_handphone')
                                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                                 @enderror
@@ -141,11 +141,14 @@
                                                 <label>Nomor Whatsapp <span class="text-danger">*</span></label>
                                                 <div class="input-icon">
                                                     <i class="fab fa-whatsapp"></i>
-                                                    <input type="tel" name="nomor_whatsapp"
+                                                    <input type="text" name="nomor_whatsapp"
                                                         class="form-control @error('nomor_whatsapp') is-invalid @enderror"
-                                                        value="{{ old('nomor_whatsapp') }}" placeholder="081234567890"
-                                                        required>
+                                                        value="{{ old('nomor_whatsapp') }}"
+                                                        onkeypress="return onlyNumber(event)"
+                                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                                        maxlength="13" minlength="11" required>
                                                 </div>
+                                                <small class="text-muted">Minimal 11 digit & maksimal 13 digit</small>
                                                 @error('nomor_whatsapp')
                                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                                 @enderror
@@ -159,9 +162,10 @@
                                                 <input type="text" name="nomor_identitas"
                                                     class="form-control @error('nomor_identitas') is-invalid @enderror"
                                                     value="{{ old('nomor_identitas') }}" maxlength="16"
-                                                    onkeypress="return onlyNumber(event)" required>
+                                                    onkeypress="return onlyNumber(event)"
+                                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                                             </div>
-                                            <small class="text-muted">16 digit angka (sesuai KTP)</small>
+                                            <small class="text-muted">16 digit angka (Sesuai KTP)</small>
                                             @error('nomor_identitas')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -169,9 +173,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Kolom Kanan -->
                                 <div class="col-md-6">
-                                    <!-- Alamat -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-map-marker-alt"></i>
@@ -181,7 +183,7 @@
                                         <div class="form-group">
                                             <label>Alamat Domisili <span class="text-danger">*</span></label>
                                             <textarea name="alamat_domisili" class="form-control @error('alamat_domisili') is-invalid @enderror" rows="2"
-                                                placeholder="Jl. Contoh No. 123, RT 01/RW 02" required>{{ old('alamat_domisili') }}</textarea>
+                                                placeholder=" " required>{{ old('alamat_domisili') }}</textarea>
                                             @error('alamat_domisili')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -225,7 +227,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Pendidikan -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-graduation-cap"></i>
@@ -235,7 +236,7 @@
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <label>Pendidikan Terakhir <span class="text-danger">*</span></label>
-                                                <select name="pendidikan_terakhir"
+                                                <select name="pendidikan_terakhir" id="pendidikan_terakhir"
                                                     class="form-control @error('pendidikan_terakhir') is-invalid @enderror"
                                                     required>
                                                     <option value="">-- Pilih Jenjang --</option>
@@ -252,36 +253,61 @@
                                                 @enderror
                                             </div>
                                             <div class="form-group col-md-6">
-                                                <label>Jurusan <span class="text-danger">*</span></label>
+                                                <label>Nama Instansi</label>
                                                 <div class="input-icon">
-                                                    <i class="fas fa-book"></i>
-                                                    <input type="text" name="jurusan"
-                                                        class="form-control @error('jurusan') is-invalid @enderror"
-                                                        value="{{ old('jurusan') }}"
-                                                        placeholder="Contoh: Teknik Informatika" required>
+                                                    <i class="fas fa-university"></i>
+                                                    <select name="instansi" id="instansi_select" class="form-control">
+                                                        <option value="">-- Pilih Instansi --</option>
+                                                        @foreach ($instansiOptions as $value => $label)
+                                                            <option value="{{ $value }}"
+                                                                {{ old('instansi') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <input type="text" name="instansi" id="instansi_input"
+                                                        class="form-control" style="display: none;"
+                                                        placeholder="Masukkan nama instansi"
+                                                        value="{{ old('instansi') }}">
                                                 </div>
-                                                @error('jurusan')
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label>Jurusan</label>
+                                                <div class="input-icon">
+                                                    <i class="fas fa-graduation-cap"></i>
+                                                    <select name="jurusan" id="jurusan_select" class="form-control">
+                                                        <option value="">-- Pilih Jurusan --</option>
+                                                        @foreach ($jurusanOptions as $value => $label)
+                                                            <option value="{{ $value }}"
+                                                                {{ old('jurusan') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <input type="text" name="jurusan" id="jurusan_input"
+                                                        class="form-control" style="display: none;"
+                                                        placeholder="Masukkan nama jurusan" value="{{ old('jurusan') }}">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label>Gaji Diharapkan <span class="text-danger">*</span></label>
+                                                <div class="input-group-prefix">
+                                                    <span class="prefix">Rp</span>
+                                                    <input type="text" name="gaji_diharapkan"
+                                                        class="form-control @error('gaji_diharapkan') is-invalid @enderror"
+                                                        value="{{ old('gaji_diharapkan') }}" onkeyup="formatRupiah(this)"
+                                                        placeholder="5.000.000" required>
+                                                </div>
+                                                @error('gaji_diharapkan')
                                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label>Gaji Diharapkan <span class="text-danger">*</span></label>
-                                            <div class="input-group-prefix">
-                                                <span class="prefix">Rp</span>
-                                                <input type="text" name="gaji_diharapkan"
-                                                    class="form-control @error('gaji_diharapkan') is-invalid @enderror"
-                                                    value="{{ old('gaji_diharapkan') }}" onkeyup="formatRupiah(this)"
-                                                    placeholder="5.000.000" required>
-                                            </div>
-                                            @error('gaji_diharapkan')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
                                     </div>
 
-                                    <!-- Akun -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-lock"></i>
@@ -393,9 +419,11 @@
             top: 50%;
             transform: translateY(-50%);
             color: #adb5bd;
+            z-index: 1;
         }
 
-        .input-icon .form-control {
+        .input-icon .form-control,
+        .input-icon .form-select {
             padding-left: 36px;
         }
 
@@ -463,6 +491,33 @@
             width: 50%;
         }
 
+        .form-section {
+            overflow: visible !important;
+        }
+
+        .card-body {
+            overflow: visible !important;
+        }
+
+        .card {
+            overflow: visible !important;
+        }
+
+        .container-fluid,
+        .row,
+        .col-12,
+        .col-md-6 {
+            overflow: visible !important;
+        }
+
+        .form-select {
+            background-position: right 0.75rem center !important;
+        }
+
+        .input-icon .form-select {
+            background-position: right 0.75rem center !important;
+        }
+
         @media (max-width: 768px) {
             .col-md-6 {
                 width: 100%;
@@ -504,7 +559,44 @@
             }
         }
 
-        // API Wilayah
+        document.addEventListener('DOMContentLoaded', function() {
+            const tingkatSelect = document.getElementById('pendidikan_terakhir');
+            const instansiSelect = document.getElementById('instansi_select');
+            const instansiInput = document.getElementById('instansi_input');
+            const jurusanSelect = document.getElementById('jurusan_select');
+            const jurusanInput = document.getElementById('jurusan_input');
+
+            const tingkatDropdown = ['Diploma (D3)', 'Diploma (D4)', 'Sarjana (S1)', 'Magister (S2)'];
+
+            function toggleInstansiJurusan() {
+                const selected = tingkatSelect ? tingkatSelect.value : '';
+
+                if (tingkatDropdown.includes(selected)) {
+                    instansiSelect.style.display = 'block';
+                    instansiInput.style.display = 'none';
+                    jurusanSelect.style.display = 'block';
+                    jurusanInput.style.display = 'none';
+                } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
+                    instansiSelect.style.display = 'none';
+                    instansiInput.style.display = 'block';
+                    jurusanSelect.style.display = 'none';
+                    jurusanInput.style.display = 'block';
+                } else {
+                    instansiSelect.style.display = 'block';
+                    instansiInput.style.display = 'none';
+                    jurusanSelect.style.display = 'block';
+                    jurusanInput.style.display = 'none';
+                }
+            }
+
+            if (tingkatSelect) {
+                tingkatSelect.addEventListener('change', toggleInstansiJurusan);
+                toggleInstansiJurusan();
+            }
+
+            loadProvinsi();
+        });
+
         const API_PROVINSI = 'https://ibnux.github.io/data-indonesia/provinsi.json';
         let provinsiData = [];
 
@@ -638,9 +730,5 @@
                 desaSelect.disabled = true;
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProvinsi();
-        });
     </script>
 @endsection

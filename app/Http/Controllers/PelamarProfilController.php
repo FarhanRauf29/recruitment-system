@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class PelamarProfilController extends Controller
 {
@@ -43,6 +44,9 @@ class PelamarProfilController extends Controller
         $pendidikanOptions = Pelamar::pendidikanOptions();
         $jenisKelaminOptions = Pelamar::jenisKelaminOptions();
         $kewarganegaraanOptions = Pelamar::kewarganegaraanOptions();
+        $jurusanOptions = Pelamar::jurusanOptions();
+        $bahasaOptions = Pelamar::bahasaOptions();
+        $instansiOptions = Pelamar::instansiOptions();
 
         $progres = $this->hitungProgres($pelamar, $pendidikan, $organisasi, $magang, $pengalaman, $bahasa, $keahlian);
         $nilaiAdministrasi = $this->hitungNilaiAdministrasi($pelamar, $pendidikan, $pengalaman, $magang, $organisasi, $bahasa, $keahlian);
@@ -62,10 +66,83 @@ class PelamarProfilController extends Controller
             'pendidikanOptions',
             'jenisKelaminOptions',
             'kewarganegaraanOptions',
+            'jurusanOptions',
+            'bahasaOptions',
+            'instansiOptions',
             'progres',
             'nilaiAdministrasi',
             'lowonganTerdaftar'
         ));
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $pelamar = Pelamar::where('user_id', Auth::id())->first();
+
+        $rules = [
+            'nama_depan' => 'nullable|string|max:255',
+            'nama_belakang' => 'nullable|string|max:255',
+            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
+            'tempat_lahir' => 'nullable|string|max:255',
+            'tanggal_lahir' => [
+                'nullable',
+                'date',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $umur = Carbon::parse($value)->age;
+                        if ($umur < 18) {
+                            $fail('Maaf, Anda harus berusia minimal 18 tahun untuk mendaftar.');
+                        }
+                    }
+                }
+            ],
+            'kewarganegaraan' => 'nullable|string|max:100',
+            'nomor_handphone' => [
+                'nullable',
+                'string',
+                'min:11',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'starts_with:08'
+            ],
+            'nomor_whatsapp' => [
+                'nullable',
+                'string',
+                'min:11',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'starts_with:08'
+            ],
+            'nomor_identitas' => 'nullable|string|max:20|unique:pelamar,nomor_identitas,' . ($pelamar->id ?? 'NULL'),
+            'provinsi' => 'nullable|string|max:100',
+            'kab_kota' => 'nullable|string|max:100',
+            'kecamatan' => 'nullable|string|max:100',
+            'desa_kelurahan' => 'nullable|string|max:100',
+            'alamat_domisili' => 'nullable|string',
+            'pendidikan_terakhir' => 'nullable|string',
+            'jurusan' => 'nullable|string|max:255',
+            'instansi' => 'nullable|string|max:255',
+            'gaji_diharapkan' => 'nullable|string|max:255',
+        ];
+
+        $request->validate($rules);
+
+        // PASTIKAN JURUSAN DAN INSTANSI DIAMBIL
+        $data = $request->all();
+        $data['jurusan'] = $request->input('jurusan');
+        $data['instansi'] = $request->input('instansi');
+
+        $pelamar->update($data);
+
+        $lowonganTerdaftar = PelamarTahapan::where('pelamar_id', $pelamar->id)
+            ->pluck('lowongan_id')
+            ->unique();
+
+        foreach ($lowonganTerdaftar as $lowonganId) {
+            $this->simpanNilaiAdministrasi($pelamar->id, $lowonganId);
+        }
+
+        return redirect()->route('pelamar.profil.index')->with('success', 'Profil berhasil diperbarui.');
     }
 
     private function hitungProgres($pelamar, $pendidikan, $organisasi, $magang, $pengalaman, $bahasa, $keahlian)
@@ -202,44 +279,6 @@ class PelamarProfilController extends Controller
         return 40;
     }
 
-    public function updateProfil(Request $request)
-    {
-        $pelamar = Pelamar::where('user_id', Auth::id())->first();
-
-        $rules = [
-            'nama_depan' => 'nullable|string|max:255',
-            'nama_belakang' => 'nullable|string|max:255',
-            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'kewarganegaraan' => 'nullable|string|max:100',
-            'nomor_handphone' => 'nullable|string|max:15',
-            'nomor_whatsapp' => 'nullable|string|max:15',
-            'nomor_identitas' => 'nullable|string|max:20|unique:pelamar,nomor_identitas,' . ($pelamar->id ?? 'NULL'),
-            'provinsi' => 'nullable|string|max:100',
-            'kab_kota' => 'nullable|string|max:100',
-            'kecamatan' => 'nullable|string|max:100',
-            'desa_kelurahan' => 'nullable|string|max:100',
-            'alamat_domisili' => 'nullable|string',
-            'pendidikan_terakhir' => 'nullable|string',
-            'jurusan' => 'nullable|string|max:255',
-            'gaji_diharapkan' => 'nullable|string|max:255',
-        ];
-
-        $request->validate($rules);
-        $pelamar->update($request->all());
-
-        $lowonganTerdaftar = PelamarTahapan::where('pelamar_id', $pelamar->id)
-            ->pluck('lowongan_id')
-            ->unique();
-
-        foreach ($lowonganTerdaftar as $lowonganId) {
-            $this->simpanNilaiAdministrasi($pelamar->id, $lowonganId);
-        }
-
-        return redirect()->route('pelamar.profil.index')->with('success', 'Profil berhasil diperbarui.');
-    }
-
     public function simpanNilaiAdministrasi($pelamarId, $lowonganId)
     {
         $pelamar = Pelamar::find($pelamarId);
@@ -278,7 +317,7 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'tingkat' => 'required|string',
-            'nama_instansi' => 'required|string|max:255',
+            'instansi' => 'required|string|max:255',
             'jurusan' => 'nullable|string|max:255',
             'tahun_masuk' => 'nullable|string|max:4',
             'tahun_lulus' => 'required|string|max:4',
@@ -290,7 +329,7 @@ class PelamarProfilController extends Controller
         RiwayatPendidikan::create([
             'pelamar_id' => $pelamar->id,
             'tingkat' => $request->tingkat,
-            'nama_instansi' => $request->nama_instansi,
+            'nama_instansi' => $request->instansi,
             'jurusan' => $request->jurusan,
             'tahun_masuk' => $request->tahun_masuk,
             'tahun_lulus' => $request->tahun_lulus,
@@ -312,12 +351,22 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'tingkat' => 'required|string',
-            'nama_instansi' => 'required|string|max:255',
+            'instansi' => 'required|string|max:255',
+            'jurusan' => 'nullable|string|max:255',
+            'tahun_masuk' => 'nullable|string|max:4',
             'tahun_lulus' => 'required|string|max:4',
+            'nilai' => 'nullable|string|max:10',
         ]);
 
         $pendidikan = RiwayatPendidikan::findOrFail($id);
-        $pendidikan->update($request->all());
+        $pendidikan->update([
+            'tingkat' => $request->tingkat,
+            'nama_instansi' => $request->instansi,
+            'jurusan' => $request->jurusan,
+            'tahun_masuk' => $request->tahun_masuk,
+            'tahun_lulus' => $request->tahun_lulus,
+            'nilai' => $request->nilai,
+        ]);
 
         $pelamar = Pelamar::where('user_id', Auth::id())->first();
 
@@ -384,6 +433,7 @@ class PelamarProfilController extends Controller
             'nama_organisasi' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
             'tahun' => 'required|string|max:4',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $organisasi = RiwayatOrganisasi::findOrFail($id);
@@ -459,7 +509,11 @@ class PelamarProfilController extends Controller
         $request->validate([
             'perusahaan' => 'required|string|max:255',
             'posisi' => 'required|string|max:255',
+            'lokasi' => 'nullable|string|max:255',
             'durasi' => 'required|string',
+            'tanggal_mulai' => 'nullable|date',
+            'tanggal_selesai' => 'nullable|date',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $magang = RiwayatMagang::findOrFail($id);
@@ -535,7 +589,11 @@ class PelamarProfilController extends Controller
         $request->validate([
             'perusahaan' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
+            'lokasi' => 'nullable|string|max:255',
             'tahun_masuk' => 'required|string|max:4',
+            'tahun_keluar' => 'nullable|string|max:4',
+            'is_current' => 'boolean',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $pengalaman = RiwayatPengalaman::findOrFail($id);
@@ -573,7 +631,7 @@ class PelamarProfilController extends Controller
     public function storeBahasa(Request $request)
     {
         $request->validate([
-            'nama_bahasa' => 'required|string|max:100',
+            'nama_bahasa' => 'required|in:' . implode(',', array_keys(Pelamar::bahasaOptions())),
             'tingkat' => 'required|in:Pasif,Aktif,Lancar,Native',
             'sertifikat_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -608,12 +666,26 @@ class PelamarProfilController extends Controller
     public function updateBahasa(Request $request, $id)
     {
         $request->validate([
-            'nama_bahasa' => 'required|string|max:100',
+            'nama_bahasa' => 'required|in:' . implode(',', array_keys(Pelamar::bahasaOptions())),
             'tingkat' => 'required|in:Pasif,Aktif,Lancar,Native',
+            'sertifikat_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $bahasa = RiwayatBahasa::findOrFail($id);
-        $bahasa->update($request->all());
+
+        if ($request->hasFile('sertifikat_file')) {
+            if ($bahasa->sertifikat && Storage::disk('public')->exists($bahasa->sertifikat)) {
+                Storage::disk('public')->delete($bahasa->sertifikat);
+            }
+            $file = $request->file('sertifikat_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $sertifikatPath = $file->storeAs('sertifikat/bahasa', $filename, 'public');
+            $bahasa->sertifikat = $sertifikatPath;
+        }
+
+        $bahasa->nama_bahasa = $request->nama_bahasa;
+        $bahasa->tingkat = $request->tingkat;
+        $bahasa->save();
 
         $pelamar = Pelamar::where('user_id', Auth::id())->first();
 
@@ -688,10 +760,25 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'nama_keahlian' => 'required|string|max:100',
+            'tingkat' => 'nullable|string|max:50',
+            'sertifikat_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $keahlian = RiwayatKeahlian::findOrFail($id);
-        $keahlian->update($request->all());
+
+        if ($request->hasFile('sertifikat_file')) {
+            if ($keahlian->sertifikat && Storage::disk('public')->exists($keahlian->sertifikat)) {
+                Storage::disk('public')->delete($keahlian->sertifikat);
+            }
+            $file = $request->file('sertifikat_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $sertifikatPath = $file->storeAs('sertifikat/keahlian', $filename, 'public');
+            $keahlian->sertifikat = $sertifikatPath;
+        }
+
+        $keahlian->nama_keahlian = $request->nama_keahlian;
+        $keahlian->tingkat = $request->tingkat;
+        $keahlian->save();
 
         $pelamar = Pelamar::where('user_id', Auth::id())->first();
 

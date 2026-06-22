@@ -26,8 +26,10 @@ return new class extends Migration
             $table->string('kab_kota', 100)->nullable();
             $table->string('kecamatan', 100)->nullable();
             $table->string('desa_kelurahan', 100)->nullable();
+            $table->string('instansi')->nullable();
             $table->string('jurusan')->nullable();
             $table->date('tanggal_lahir')->nullable();
+            $table->integer('umur')->nullable();
             $table->string('nomor_identitas', 20)->nullable()->unique();
             $table->string('nomor_whatsapp', 15)->nullable();
             $table->string('foto_profil')->nullable();

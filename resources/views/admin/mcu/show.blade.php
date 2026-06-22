@@ -274,7 +274,7 @@
                                                 <option value="Sehat">Sehat </option>
                                                 <option value="Cukup">Cukup </option>
                                                 <option value="Kurang">Kurang </option>
-                                                <option value="Tidak Lulus">Tidak Lulus </option>
+                                                <option value="Tidak Lulus">Tidak Memenuhi Syarat </option>
                                             </select>
                                         </div>
                                         <div class="col-md-4">

@@ -4,7 +4,6 @@
 
 @section('content')
     <div class="container-fluid px-4 py-4">
-        <!-- Header -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="h3 mb-1 fw-semibold" style="color: #1e293b;">
@@ -17,9 +16,7 @@
             </a>
         </div>
 
-        <!-- Main Card -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <!-- Profile Header -->
             <div class="bg-primary px-4 py-3">
                 <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle bg-white bg-opacity-20 p-2">
@@ -38,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- Tabs Navigation -->
             <div class="border-bottom px-4 pt-3">
                 <ul class="nav nav-tabs border-0 gap-2 flex-nowrap overflow-auto pb-1" style="scrollbar-width: thin;">
                     <li class="nav-item"><button class="nav-link active fw-medium rounded-pill px-3 py-1 small"
@@ -65,13 +61,10 @@
                 </ul>
             </div>
 
-            <!-- Tab Content -->
             <div class="card-body p-4">
                 <div class="tab-content">
-                    <!-- TAB PROFIL SINGKAT -->
                     <div class="tab-pane fade show active" id="profil">
                         <div class="row g-4">
-                            <!-- Data Pribadi -->
                             <div class="col-md-6">
                                 <div class="info-card">
                                     <div class="info-card-header">
@@ -113,7 +106,6 @@
                                 </div>
                             </div>
 
-                            <!-- Informasi Kontak -->
                             <div class="col-md-6">
                                 <div class="info-card">
                                     <div class="info-card-header">
@@ -142,20 +134,40 @@
                                             <div class="info-value">{{ $pelamar->pendidikan_terakhir ?? '-' }}</div>
                                         </div>
                                         <div class="info-row">
+                                            <div class="info-label">Instansi</div>
+                                            <div class="info-value">
+                                                @if (!empty($pelamar->instansi))
+                                                    {{ $pelamar->instansi }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
                                             <div class="info-label">Jurusan</div>
-                                            <div class="info-value">{{ $pelamar->jurusan ?? '-' }}</div>
+                                            <div class="info-value">
+                                                @if (!empty($pelamar->jurusan))
+                                                    {{ $pelamar->jurusan }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </div>
                                         </div>
                                         <div class="info-row">
                                             <div class="info-label">Gaji Diharapkan</div>
-                                            <div class="info-value text-primary fw-semibold">Rp
-                                                {{ number_format((float) preg_replace('/[^0-9]/', '', $pelamar->gaji_diharapkan), 0, ',', '.') ?? '-' }}
+                                            <div class="info-value text-primary fw-semibold">
+                                                @if (!empty($pelamar->gaji_diharapkan))
+                                                    Rp
+                                                    {{ number_format((float) preg_replace('/[^0-9]/', '', $pelamar->gaji_diharapkan), 0, ',', '.') }}
+                                                @else
+                                                    -
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Alamat Domisili -->
                             <div class="col-12">
                                 <div class="info-card">
                                     <div class="info-card-header">
@@ -199,7 +211,6 @@
                         </div>
                     </div>
 
-                    <!-- TAB PENDIDIKAN -->
                     <div class="tab-pane fade" id="pendidikan">
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
@@ -220,9 +231,19 @@
                                             <td><span
                                                     class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">{{ $item->tingkat }}</span>
                                             </td>
-                                            <td>{{ $item->nama_instansi }}</td>
-                                            <td>{{ $item->jurusan ?? '-' }}</td>
-                                            <td>{{ $item->tahun_masuk ? $item->tahun_masuk . ' - ' : '' }}{{ $item->tahun_lulus }}
+                                            <td>{{ $item->nama_instansi ?? '-' }}</td>
+                                            <td>
+                                                @if (!empty($item->jurusan))
+                                                    {{ $item->jurusan }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($item->tahun_masuk)
+                                                    {{ $item->tahun_masuk }} -
+                                                @endif
+                                                {{ $item->tahun_lulus ?? '-' }}
                                             </td>
                                             <td>{{ $item->nilai ?? '-' }}</td>
                                         </tr>
@@ -239,7 +260,6 @@
                         </div>
                     </div>
 
-                    <!-- TAB ORGANISASI -->
                     <div class="tab-pane fade" id="organisasi">
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
@@ -274,7 +294,6 @@
                         </div>
                     </div>
 
-                    <!-- TAB MAGANG/PKL -->
                     <div class="tab-pane fade" id="magang">
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
@@ -311,7 +330,6 @@
                         </div>
                     </div>
 
-                    <!-- TAB PENGALAMAN KERJA -->
                     <div class="tab-pane fade" id="pengalaman">
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
@@ -349,7 +367,6 @@
                         </div>
                     </div>
 
-                    <!-- TAB BAHASA -->
                     <div class="tab-pane fade" id="bahasa">
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle">
@@ -391,7 +408,6 @@
                         </div>
                     </div>
 
-                    <!-- TAB KEAHLIAN -->
                     <div class="tab-pane fade" id="keahlian">
                         <div class="d-flex flex-wrap gap-2">
                             @forelse($keahlian as $item)

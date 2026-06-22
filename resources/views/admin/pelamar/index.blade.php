@@ -102,9 +102,9 @@
                                                     <a href="{{ route('admin.pelamar.profil', $pelamar->id) }}"
                                                         class="btn btn-outline-success" title="Detail Profil"><i
                                                             class="fas fa-id-card"></i></a>
-                                                    <a href="{{ route('admin.pelamar.show', $pelamar->id) }}"
+                                                    {{-- <a href="{{ route('admin.pelamar.show', $pelamar->id) }}"
                                                         class="btn btn-outline-info" title="Detail"><i
-                                                            class="fas fa-eye"></i></a>
+                                                            class="fas fa-eye"></i></a> --}}
                                                     <a href="{{ route('admin.pelamar.edit', $pelamar->id) }}"
                                                         class="btn btn-outline-warning" title="Edit"><i
                                                             class="fas fa-edit"></i></a>

@@ -15,6 +15,7 @@ use App\Imports\PelamarImport;
 use App\Exports\PelamarExport;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PelamarController extends Controller
 {
@@ -43,8 +44,18 @@ class PelamarController extends Controller
         $pendidikanOptions = Pelamar::pendidikanOptions();
         $jenisKelaminOptions = Pelamar::jenisKelaminOptions();
         $kewarganegaraanOptions = Pelamar::kewarganegaraanOptions();
+        $jurusanOptions = Pelamar::jurusanOptions();
+        $bahasaOptions = Pelamar::bahasaOptions();
+        $instansiOptions = Pelamar::instansiOptions();
 
-        return view('admin.pelamar.create', compact('pendidikanOptions', 'jenisKelaminOptions', 'kewarganegaraanOptions'));
+        return view('admin.pelamar.create', compact(
+            'pendidikanOptions',
+            'jenisKelaminOptions',
+            'kewarganegaraanOptions',
+            'jurusanOptions',
+            'bahasaOptions',
+            'instansiOptions'
+        ));
     }
 
     public function store(Request $request)
@@ -55,7 +66,14 @@ class PelamarController extends Controller
             'jenis_kelamin'       => 'required|string|in:Laki-laki,Perempuan',
             'tempat_lahir'        => 'required|string|max:255',
             'kewarganegaraan'     => 'required|string|max:100',
-            'nomor_handphone'     => 'required|string|max:15',
+            'nomor_handphone'     => [
+                'required',
+                'string',
+                'min:11',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'starts_with:08'
+            ],
             'gaji_diharapkan'     => 'required|string|max:255',
             'alamat_domisili'     => 'required|string',
             'provinsi'            => 'required|string|max:100',
@@ -63,13 +81,40 @@ class PelamarController extends Controller
             'kab_kota'            => 'required|string|max:100',
             'kecamatan'           => 'nullable|string|max:100',
             'desa_kelurahan'      => 'nullable|string|max:100',
-            'jurusan'             => 'required|string|max:255',
-            'tanggal_lahir'       => 'required|date',
+            'jurusan'             => 'nullable|string|max:255',
+            'instansi'            => 'nullable|string|max:255',
+            'tanggal_lahir'       => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $umur = Carbon::parse($value)->age;
+                    if ($umur < 18) {
+                        $fail('Maaf, Anda harus berusia minimal 18 tahun untuk mendaftar.');
+                    }
+                }
+            ],
             'nomor_identitas'     => 'required|string|max:20|unique:pelamar,nomor_identitas',
-            'nomor_whatsapp'      => 'required|string|max:15',
-            'email'               => 'required|email|unique:users,email|unique:pelamar,email',
+            'nomor_whatsapp'      => [
+                'required',
+                'string',
+                'min:11',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'starts_with:08'
+            ],
+            'email'               => 'required|email:rfc,dns|unique:users,email|unique:pelamar,email',
             'password'            => 'nullable|string|min:8|confirmed',
             'foto_profil'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'nomor_handphone.min' => 'Nomor handphone minimal 11 digit.',
+            'nomor_handphone.max' => 'Nomor handphone maksimal 13 digit.',
+            'nomor_handphone.regex' => 'Nomor handphone hanya boleh berisi angka.',
+            'nomor_handphone.starts_with' => 'Nomor handphone harus dimulai dengan 08.',
+            'nomor_whatsapp.min' => 'Nomor WhatsApp minimal 11 digit.',
+            'nomor_whatsapp.max' => 'Nomor WhatsApp maksimal 13 digit.',
+            'nomor_whatsapp.regex' => 'Nomor WhatsApp hanya boleh berisi angka.',
+            'nomor_whatsapp.starts_with' => 'Nomor WhatsApp harus dimulai dengan 08.',
+            'email.email' => 'Masukkan alamat email yang valid (contoh: nama@domain.com).',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -110,8 +155,19 @@ class PelamarController extends Controller
         $pendidikanOptions = Pelamar::pendidikanOptions();
         $jenisKelaminOptions = Pelamar::jenisKelaminOptions();
         $kewarganegaraanOptions = Pelamar::kewarganegaraanOptions();
+        $jurusanOptions = Pelamar::jurusanOptions();
+        $bahasaOptions = Pelamar::bahasaOptions();
+        $instansiOptions = Pelamar::instansiOptions();
 
-        return view('admin.pelamar.edit', compact('pelamar', 'pendidikanOptions', 'jenisKelaminOptions', 'kewarganegaraanOptions'));
+        return view('admin.pelamar.edit', compact(
+            'pelamar',
+            'pendidikanOptions',
+            'jenisKelaminOptions',
+            'kewarganegaraanOptions',
+            'jurusanOptions',
+            'bahasaOptions',
+            'instansiOptions'
+        ));
     }
 
     public function update(Request $request, Pelamar $pelamar)
@@ -122,7 +178,14 @@ class PelamarController extends Controller
             'jenis_kelamin'       => 'required|string|in:Laki-laki,Perempuan',
             'tempat_lahir'        => 'required|string|max:255',
             'kewarganegaraan'     => 'required|string|max:100',
-            'nomor_handphone'     => 'required|string|max:15',
+            'nomor_handphone'     => [
+                'required',
+                'string',
+                'min:11',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'starts_with:08'
+            ],
             'gaji_diharapkan'     => 'required|string|max:255',
             'alamat_domisili'     => 'required|string',
             'provinsi'            => 'required|string|max:100',
@@ -130,13 +193,40 @@ class PelamarController extends Controller
             'kab_kota'            => 'required|string|max:100',
             'kecamatan'           => 'nullable|string|max:100',
             'desa_kelurahan'      => 'nullable|string|max:100',
-            'jurusan'             => 'required|string|max:255',
-            'tanggal_lahir'       => 'required|date',
+            'jurusan'             => 'nullable|string|max:255',
+            'instansi'            => 'nullable|string|max:255',
+            'tanggal_lahir'       => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $umur = Carbon::parse($value)->age;
+                    if ($umur < 18) {
+                        $fail('Maaf, Anda harus berusia minimal 18 tahun untuk mendaftar.');
+                    }
+                }
+            ],
             'nomor_identitas'     => 'required|string|max:20|unique:pelamar,nomor_identitas,' . $pelamar->id,
-            'nomor_whatsapp'      => 'required|string|max:15',
-            'email'               => 'required|email|unique:users,email,' . ($pelamar->user_id ?? 0) . '|unique:pelamar,email,' . $pelamar->id,
+            'nomor_whatsapp'      => [
+                'required',
+                'string',
+                'min:11',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'starts_with:08'
+            ],
+            'email'               => 'required|email:rfc,dns|unique:users,email,' . ($pelamar->user_id ?? 0) . '|unique:pelamar,email,' . $pelamar->id,
             'password'            => 'nullable|string|min:8|confirmed',
             'foto_profil'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'nomor_handphone.min' => 'Nomor handphone minimal 11 digit.',
+            'nomor_handphone.max' => 'Nomor handphone maksimal 13 digit.',
+            'nomor_handphone.regex' => 'Nomor handphone hanya boleh berisi angka.',
+            'nomor_handphone.starts_with' => 'Nomor handphone harus dimulai dengan 08.',
+            'nomor_whatsapp.min' => 'Nomor WhatsApp minimal 11 digit.',
+            'nomor_whatsapp.max' => 'Nomor WhatsApp maksimal 13 digit.',
+            'nomor_whatsapp.regex' => 'Nomor WhatsApp hanya boleh berisi angka.',
+            'nomor_whatsapp.starts_with' => 'Nomor WhatsApp harus dimulai dengan 08.',
+            'email.email' => 'Masukkan alamat email yang valid (contoh: nama@domain.com).',
         ]);
 
         try {
@@ -166,11 +256,14 @@ class PelamarController extends Controller
                     'kab_kota',
                     'kecamatan',
                     'desa_kelurahan',
-                    'jurusan',
                     'tanggal_lahir',
                     'nomor_identitas',
                     'nomor_whatsapp'
                 ]);
+
+                // AMBIL NILAI JURUSAN DAN INSTANSI DARI REQUEST
+                $data['jurusan'] = $request->input('jurusan');
+                $data['instansi'] = $request->input('instansi');
                 $data['nama_lengkap'] = $request->nama_depan . ' ' . $request->nama_belakang;
 
                 if ($request->hasFile('foto_profil')) {
@@ -271,25 +364,25 @@ class PelamarController extends Controller
                 fputcsv($handle, $headerRow);
 
                 $exampleRow = [
-                    'John',
-                    'Doe',
-                    'john@example.com',
+                    'Farhan',
+                    'Rauf',
+                    'farhanrauf@gmail.com',
                     '12345678',
                     'Laki-laki',
-                    'Jakarta',
-                    '1990-01-01',
+                    'Padang',
+                    '2002-09-29',
                     'WNI',
-                    '081234567890',
-                    '081234567890',
-                    '1234567890123456',
-                    'DKI Jakarta',
-                    'Jakarta Selatan',
-                    'Kebayoran Baru',
-                    'Pulo',
-                    'Jl. Contoh No. 123',
-                    'Sarjana (S1)',
-                    'Teknik Informatika',
-                    '5000000'
+                    '0895359835741',
+                    '0895359835741',
+                    '13710929090010',
+                    'Sumatera Barat',
+                    'Padang',
+                    'Kuranji',
+                    'Kuranji',
+                    'Jl. Tui Kuranji No 27',
+                    'D-4',
+                    'Teknologi Informasi',
+                    '10000000'
                 ];
 
                 fputcsv($handle, $exampleRow);
@@ -302,6 +395,7 @@ class PelamarController extends Controller
                 ->with('error', 'Gagal download template: ' . $e->getMessage());
         }
     }
+
     public function dashboardStats()
     {
         $user = Auth::user();

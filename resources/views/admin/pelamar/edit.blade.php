@@ -18,10 +18,9 @@
                             @method('PUT')
 
                             <div class="row">
-                                <!-- Kolom Foto -->
                                 <div class="col-md-3 text-center">
                                     <div class="foto-section">
-                                        @if ($pelamar->foto_profil)
+                                        @if ($pelamar->foto_profil && Storage::disk('public')->exists($pelamar->foto_profil))
                                             <img src="{{ Storage::url($pelamar->foto_profil) }}" alt="Foto Profil"
                                                 class="profile-img" id="profilePreview">
                                         @else
@@ -39,9 +38,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Kolom Kanan -->
                                 <div class="col-md-9">
-                                    <!-- Data Diri -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-id-card"></i>
@@ -85,7 +82,8 @@
                                                     @foreach ($jenisKelaminOptions as $value => $label)
                                                         <option value="{{ $value }}"
                                                             {{ old('jenis_kelamin', $pelamar->jenis_kelamin) == $value ? 'selected' : '' }}>
-                                                            {{ $label }}</option>
+                                                            {{ $label }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -115,7 +113,8 @@
                                                     @foreach ($kewarganegaraanOptions as $value => $label)
                                                         <option value="{{ $value }}"
                                                             {{ old('kewarganegaraan', $pelamar->kewarganegaraan) == $value ? 'selected' : '' }}>
-                                                            {{ $label }}</option>
+                                                            {{ $label }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -154,7 +153,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Alamat -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-map-marker-alt"></i>
@@ -196,13 +194,13 @@
                                                 <label>Desa/Kelurahan</label>
                                                 <select name="desa_kelurahan" id="desa_kelurahan" class="form-control">
                                                     <option value="{{ $pelamar->desa_kelurahan }}">
-                                                        {{ $pelamar->desa_kelurahan }}</option>
+                                                        {{ $pelamar->desa_kelurahan }}
+                                                    </option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Pendidikan -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-graduation-cap"></i>
@@ -212,36 +210,69 @@
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <label>Pendidikan Terakhir <span class="text-danger">*</span></label>
-                                                <select name="pendidikan_terakhir" class="form-control" required>
+                                                <select name="pendidikan_terakhir" id="pendidikan_terakhir"
+                                                    class="form-control" required>
                                                     @foreach ($pendidikanOptions as $value => $label)
                                                         <option value="{{ $value }}"
                                                             {{ old('pendidikan_terakhir', $pelamar->pendidikan_terakhir) == $value ? 'selected' : '' }}>
-                                                            {{ $label }}</option>
+                                                            {{ $label }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                             <div class="form-group col-md-6">
-                                                <label>Jurusan <span class="text-danger">*</span></label>
+                                                <label>Nama Instansi</label>
                                                 <div class="input-icon">
-                                                    <i class="fas fa-book"></i>
-                                                    <input type="text" name="jurusan" class="form-control"
-                                                        value="{{ old('jurusan', $pelamar->jurusan) }}" required>
+                                                    <i class="fas fa-university"></i>
+                                                    <select name="instansi" id="instansi_select" class="form-control">
+                                                        <option value="">-- Pilih Instansi --</option>
+                                                        @foreach ($instansiOptions as $value => $label)
+                                                            <option value="{{ $value }}"
+                                                                {{ old('instansi', $pelamar->instansi) == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <input type="text" name="instansi" id="instansi_input"
+                                                        class="form-control" style="display: none;"
+                                                        placeholder="Masukkan nama instansi"
+                                                        value="{{ old('instansi', $pelamar->instansi) }}">
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Gaji Diharapkan <span class="text-danger">*</span></label>
-                                            <div class="input-group-prefix">
-                                                <span class="prefix">Rp</span>
-                                                <input type="text" name="gaji_diharapkan" class="form-control"
-                                                    value="{{ old('gaji_diharapkan', $pelamar->gaji_diharapkan) }}"
-                                                    onkeyup="formatRupiah(this)" required>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label>Jurusan</label>
+                                                <div class="input-icon">
+                                                    <i class="fas fa-book"></i>
+                                                    <select name="jurusan" id="jurusan_select" class="form-control">
+                                                        <option value="">-- Pilih Jurusan --</option>
+                                                        @foreach ($jurusanOptions as $value => $label)
+                                                            <option value="{{ $value }}"
+                                                                {{ old('jurusan', $pelamar->jurusan) == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <input type="text" name="jurusan" id="jurusan_input"
+                                                        class="form-control" style="display: none;"
+                                                        placeholder="Masukkan nama jurusan"
+                                                        value="{{ old('jurusan', $pelamar->jurusan) }}">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label>Gaji Diharapkan <span class="text-danger">*</span></label>
+                                                <div class="input-group-prefix">
+                                                    <span class="prefix">Rp</span>
+                                                    <input type="text" name="gaji_diharapkan" class="form-control"
+                                                        value="{{ old('gaji_diharapkan', $pelamar->gaji_diharapkan) }}"
+                                                        onkeyup="formatRupiah(this)" required>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Akun -->
                                     <div class="form-section">
                                         <div class="section-header">
                                             <i class="fas fa-lock"></i>
@@ -413,6 +444,44 @@
     </style>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tingkatSelect = document.getElementById('pendidikan_terakhir');
+            const instansiSelect = document.getElementById('instansi_select');
+            const instansiInput = document.getElementById('instansi_input');
+            const jurusanSelect = document.getElementById('jurusan_select');
+            const jurusanInput = document.getElementById('jurusan_input');
+
+            const tingkatDropdown = ['Diploma (D3)', 'Diploma (D4)', 'Sarjana (S1)', 'Magister (S2)'];
+
+            function toggleInstansiJurusan() {
+                const selected = tingkatSelect ? tingkatSelect.value : '';
+
+                if (tingkatDropdown.includes(selected)) {
+                    instansiSelect.style.display = 'block';
+                    instansiInput.style.display = 'none';
+                    jurusanSelect.style.display = 'block';
+                    jurusanInput.style.display = 'none';
+                } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
+                    instansiSelect.style.display = 'none';
+                    instansiInput.style.display = 'block';
+                    jurusanSelect.style.display = 'none';
+                    jurusanInput.style.display = 'block';
+                } else {
+                    instansiSelect.style.display = 'block';
+                    instansiInput.style.display = 'none';
+                    jurusanSelect.style.display = 'block';
+                    jurusanInput.style.display = 'none';
+                }
+            }
+
+            if (tingkatSelect) {
+                tingkatSelect.addEventListener('change', toggleInstansiJurusan);
+                toggleInstansiJurusan();
+            }
+
+            loadProvinsi();
+        });
+
         const savedProvinsi = "{{ $pelamar->provinsi }}";
         const savedKabKota = "{{ $pelamar->kab_kota }}";
         const savedKecamatan = "{{ $pelamar->kecamatan }}";
@@ -451,7 +520,6 @@
             }
         }
 
-        // Preview foto
         document.getElementById('foto_profil')?.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size <= 2 * 1024 * 1024) {
@@ -464,7 +532,6 @@
             }
         });
 
-        // API Wilayah
         const API_PROVINSI = 'https://ibnux.github.io/data-indonesia/provinsi.json';
         let provinsiData = [];
 
