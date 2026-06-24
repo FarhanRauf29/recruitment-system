@@ -4,13 +4,14 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0"><i class="fas fa-file-alt text-primary me-2"></i>Detail Berkas Saya</h2>
-            <a href="{{ route('pelamar.berkas.index') }}" class="btn btn-outline-secondary"><i
-                    class="fas fa-arrow-left me-1"></i> Kembali</a>
+            <a href="{{ route('pelamar.berkas.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Kembali
+            </a>
         </div>
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Status Berkas</h5>
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Status Berkas</h5>
                 <span
                     class="badge rounded-pill py-2 px-3 fs-6 {{ $berkas->status_verifikasi == 'Diterima' ? 'bg-success' : ($berkas->status_verifikasi == 'Ditolak' ? 'bg-danger' : 'bg-warning') }}">
                     <i
@@ -19,31 +20,50 @@
                 </span>
             </div>
             <div class="card-body">
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded me-3"><i
-                                    class="fas fa-calendar-alt text-primary fs-4"></i></div>
+                        <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                                <i class="fas fa-calendar-alt text-primary fs-4"></i>
+                            </div>
                             <div>
                                 <p class="mb-0 text-muted small">Tanggal Upload</p>
-                                <p class="mb-0 fw-bold">{{ $berkas->created_at->translatedFormat('l, d F Y') }}</p>
+                                <p class="mb-0 fw-bold">
+                                    {{ $berkas->created_at ? $berkas->created_at->translatedFormat('d F Y H:i') : '-' }}</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-info bg-opacity-10 p-3 rounded me-3"><i
-                                    class="fas fa-sync-alt text-info fs-4"></i></div>
+                        <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                            <div class="bg-info bg-opacity-10 p-3 rounded me-3">
+                                <i class="fas fa-sync-alt text-info fs-4"></i>
+                            </div>
                             <div>
                                 <p class="mb-0 text-muted small">Terakhir Diperbarui</p>
-                                <p class="mb-0 fw-bold">{{ $berkas->updated_at->translatedFormat('l, d F Y') }}</p>
+                                <p class="mb-0 fw-bold">
+                                    {{ $berkas->updated_at ? $berkas->updated_at->translatedFormat('d F Y H:i') : '-' }}</p>
                             </div>
                         </div>
                     </div>
+                    @if ($berkas->tanggal_verifikasi)
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-success bg-opacity-10 p-3 rounded me-3">
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0 text-muted small">Tanggal Verifikasi</p>
+                                    <p class="mb-0 fw-bold">
+                                        {{ $berkas->tanggal_verifikasi ? $berkas->tanggal_verifikasi->translatedFormat('d F Y H:i') : '-' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
                 @if ($berkas->catatan_admin)
                     <div
-                        class="alert {{ $berkas->status_verifikasi == 'Diterima' ? 'alert-success' : ($berkas->status_verifikasi == 'Ditolak' ? 'alert-danger' : 'alert-warning') }}">
+                        class="alert {{ $berkas->status_verifikasi == 'Diterima' ? 'alert-success' : ($berkas->status_verifikasi == 'Ditolak' ? 'alert-danger' : 'alert-warning') }} mt-3">
                         <div class="d-flex align-items-center">
                             <i
                                 class="fas {{ $berkas->status_verifikasi == 'Diterima' ? 'fa-check-circle' : ($berkas->status_verifikasi == 'Ditolak' ? 'fa-times-circle' : 'fa-info-circle') }} me-2 fs-4"></i>
@@ -87,13 +107,20 @@
                                 @if ($berkas->$field && Storage::disk('public')->exists($berkas->$field))
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <a href="{{ asset('storage/' . $berkas->$field) }}" target="_blank"
-                                            class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i> Lihat</a>
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i> Lihat
+                                        </a>
                                         <a href="{{ asset('storage/' . $berkas->$field) }}" download
-                                            class="btn btn-sm btn-primary"><i class="fas fa-download me-1"></i> Unduh</a>
+                                            class="btn btn-sm btn-primary">
+                                            <i class="fas fa-download me-1"></i> Unduh
+                                        </a>
                                     </div>
                                 @else
-                                    <div class="mt-3"><span class="badge bg-light text-dark"><i
-                                                class="fas fa-exclamation-circle me-1"></i> Belum diunggah</span></div>
+                                    <div class="mt-3">
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-exclamation-circle me-1"></i> Belum diunggah
+                                        </span>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -132,6 +159,10 @@
 
         .text-brown {
             color: #795548 !important;
+        }
+
+        .bg-opacity-10 {
+            --bs-bg-opacity: 0.1;
         }
     </style>
 @endsection

@@ -444,49 +444,6 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tingkatSelect = document.getElementById('pendidikan_terakhir');
-            const instansiSelect = document.getElementById('instansi_select');
-            const instansiInput = document.getElementById('instansi_input');
-            const jurusanSelect = document.getElementById('jurusan_select');
-            const jurusanInput = document.getElementById('jurusan_input');
-
-            const tingkatDropdown = ['Diploma (D3)', 'Diploma (D4)', 'Sarjana (S1)', 'Magister (S2)'];
-
-            function toggleInstansiJurusan() {
-                const selected = tingkatSelect ? tingkatSelect.value : '';
-
-                if (tingkatDropdown.includes(selected)) {
-                    instansiSelect.style.display = 'block';
-                    instansiInput.style.display = 'none';
-                    jurusanSelect.style.display = 'block';
-                    jurusanInput.style.display = 'none';
-                } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
-                    instansiSelect.style.display = 'none';
-                    instansiInput.style.display = 'block';
-                    jurusanSelect.style.display = 'none';
-                    jurusanInput.style.display = 'block';
-                } else {
-                    instansiSelect.style.display = 'block';
-                    instansiInput.style.display = 'none';
-                    jurusanSelect.style.display = 'block';
-                    jurusanInput.style.display = 'none';
-                }
-            }
-
-            if (tingkatSelect) {
-                tingkatSelect.addEventListener('change', toggleInstansiJurusan);
-                toggleInstansiJurusan();
-            }
-
-            loadProvinsi();
-        });
-
-        const savedProvinsi = "{{ $pelamar->provinsi }}";
-        const savedKabKota = "{{ $pelamar->kab_kota }}";
-        const savedKecamatan = "{{ $pelamar->kecamatan }}";
-        const savedDesa = "{{ $pelamar->desa_kelurahan }}";
-
         function formatRupiah(input) {
             let value = input.value.replace(/[^0-9]/g, '');
             if (value) {
@@ -508,7 +465,6 @@
             const field = document.getElementById(fieldId);
             const btn = field.nextElementSibling;
             const icon = btn.querySelector('i');
-
             if (field.type === 'password') {
                 field.type = 'text';
                 icon.classList.remove('fa-eye-slash');
@@ -532,6 +488,61 @@
             }
         });
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const tingkatSelect = document.getElementById('pendidikan_terakhir');
+            const instansiSelect = document.getElementById('instansi_select');
+            const instansiInput = document.getElementById('instansi_input');
+            const jurusanSelect = document.getElementById('jurusan_select');
+            const jurusanInput = document.getElementById('jurusan_input');
+
+            const tingkatDropdown = ['Diploma (D3)', 'Diploma (D4)', 'Sarjana (S1)', 'Magister (S2)'];
+
+            function toggleInstansiJurusan() {
+                const selected = tingkatSelect ? tingkatSelect.value : '';
+
+                if (tingkatDropdown.includes(selected)) {
+                    instansiSelect.style.display = 'block';
+                    instansiInput.style.display = 'none';
+                    jurusanSelect.style.display = 'block';
+                    jurusanInput.style.display = 'none';
+                    instansiSelect.name = 'instansi';
+                    instansiInput.name = 'instansi';
+                    jurusanSelect.name = 'jurusan';
+                    jurusanInput.name = 'jurusan';
+                } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
+                    instansiSelect.style.display = 'none';
+                    instansiInput.style.display = 'block';
+                    jurusanSelect.style.display = 'none';
+                    jurusanInput.style.display = 'block';
+                    instansiSelect.name = 'instansi';
+                    instansiInput.name = 'instansi';
+                    jurusanSelect.name = 'jurusan';
+                    jurusanInput.name = 'jurusan';
+                } else {
+                    instansiSelect.style.display = 'block';
+                    instansiInput.style.display = 'none';
+                    jurusanSelect.style.display = 'block';
+                    jurusanInput.style.display = 'none';
+                    instansiSelect.name = 'instansi';
+                    instansiInput.name = 'instansi';
+                    jurusanSelect.name = 'jurusan';
+                    jurusanInput.name = 'jurusan';
+                }
+            }
+
+            if (tingkatSelect) {
+                tingkatSelect.addEventListener('change', toggleInstansiJurusan);
+                toggleInstansiJurusan();
+            }
+
+            loadProvinsi();
+        });
+
+        const savedProvinsi = "{{ $pelamar->provinsi }}";
+        const savedKabKota = "{{ $pelamar->kab_kota }}";
+        const savedKecamatan = "{{ $pelamar->kecamatan }}";
+        const savedDesa = "{{ $pelamar->desa_kelurahan }}";
+
         const API_PROVINSI = 'https://ibnux.github.io/data-indonesia/provinsi.json';
         let provinsiData = [];
 
@@ -553,7 +564,7 @@
                     const selected = provinsiData.find(p => p.nama === savedProvinsi);
                     if (selected) await loadKabKota(selected.id);
                 }
-                provSelect.onchange = () => {
+                provSelect.onchange = function() {
                     const selected = provinsiData.find(p => p.nama === provSelect.value);
                     if (selected) loadKabKota(selected.id);
                     else resetWilayah();
@@ -584,7 +595,7 @@
                     const selected = data.find(k => k.nama === savedKabKota);
                     if (selected) await loadKecamatan(selected.id);
                 }
-                kabSelect.onchange = () => {
+                kabSelect.onchange = function() {
                     const selected = data.find(k => k.nama === kabSelect.value);
                     if (selected) loadKecamatan(selected.id);
                     else resetWilayah(true);
@@ -617,7 +628,7 @@
                     const selected = data.find(k => k.nama === savedKecamatan);
                     if (selected) await loadDesa(selected.id);
                 }
-                kecSelect.onchange = () => {
+                kecSelect.onchange = function() {
                     const selected = data.find(k => k.nama === kecSelect.value);
                     if (selected) loadDesa(selected.id);
                     else resetDesa();
@@ -664,9 +675,5 @@
             document.getElementById('desa_kelurahan').innerHTML = '<option value="">-- Pilih Desa/Kelurahan --</option>';
             document.getElementById('desa_kelurahan').disabled = true;
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProvinsi();
-        });
     </script>
 @endsection

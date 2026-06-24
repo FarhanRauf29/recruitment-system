@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class BerkasController extends Controller
 {
@@ -270,13 +271,13 @@ class BerkasController extends Controller
 
             $berkas->status_verifikasi = $newStatus;
             $berkas->catatan_admin = $request->catatan_admin;
-            $berkas->tanggal_verifikasi = now();
+            $berkas->tanggal_verifikasi = Carbon::now('Asia/Jakarta');
             $berkas->save();
 
             $pelamarTahapan = PelamarTahapan::with('tahapan')->find($berkas->pelamar_tahapan_id);
 
             if ($pelamarTahapan) {
-                $now = now();
+                $now = Carbon::now('Asia/Jakarta');
 
                 if ($newStatus === 'Diterima' && $oldStatus !== 'Diterima') {
                     $pelamarTahapan->status = 'lolos';
@@ -324,6 +325,7 @@ class BerkasController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
         }
     }
+
     public function destroy(Berkas $berkas)
     {
         $user = Auth::user();

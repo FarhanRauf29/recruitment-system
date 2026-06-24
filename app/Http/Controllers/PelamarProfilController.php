@@ -127,7 +127,6 @@ class PelamarProfilController extends Controller
 
         $request->validate($rules);
 
-        // PASTIKAN JURUSAN DAN INSTANSI DIAMBIL
         $data = $request->all();
         $data['jurusan'] = $request->input('jurusan');
         $data['instansi'] = $request->input('instansi');
@@ -317,7 +316,7 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'tingkat' => 'required|string',
-            'instansi' => 'required|string|max:255',
+            'nama_instansi' => 'required|string|max:255',
             'jurusan' => 'nullable|string|max:255',
             'tahun_masuk' => 'nullable|string|max:4',
             'tahun_lulus' => 'required|string|max:4',
@@ -329,7 +328,7 @@ class PelamarProfilController extends Controller
         RiwayatPendidikan::create([
             'pelamar_id' => $pelamar->id,
             'tingkat' => $request->tingkat,
-            'nama_instansi' => $request->instansi,
+            'nama_instansi' => $request->nama_instansi,
             'jurusan' => $request->jurusan,
             'tahun_masuk' => $request->tahun_masuk,
             'tahun_lulus' => $request->tahun_lulus,
@@ -351,7 +350,7 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'tingkat' => 'required|string',
-            'instansi' => 'required|string|max:255',
+            'nama_instansi' => 'required|string|max:255',
             'jurusan' => 'nullable|string|max:255',
             'tahun_masuk' => 'nullable|string|max:4',
             'tahun_lulus' => 'required|string|max:4',
@@ -361,7 +360,7 @@ class PelamarProfilController extends Controller
         $pendidikan = RiwayatPendidikan::findOrFail($id);
         $pendidikan->update([
             'tingkat' => $request->tingkat,
-            'nama_instansi' => $request->instansi,
+            'nama_instansi' => $request->nama_instansi,
             'jurusan' => $request->jurusan,
             'tahun_masuk' => $request->tahun_masuk,
             'tahun_lulus' => $request->tahun_lulus,

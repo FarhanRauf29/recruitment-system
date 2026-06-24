@@ -71,8 +71,12 @@
                                                     class="form-control @error('jenis_kelamin') is-invalid @enderror"
                                                     required>
                                                     <option value="">-- Pilih --</option>
-                                                    <option value="Laki-laki">Laki-laki</option>
-                                                    <option value="Perempuan">Perempuan</option>
+                                                    <option value="Laki-laki"
+                                                        {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>
+                                                        Laki-laki</option>
+                                                    <option value="Perempuan"
+                                                        {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>
+                                                        Perempuan</option>
                                                 </select>
                                                 @error('jenis_kelamin')
                                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -111,8 +115,12 @@
                                                     class="form-control @error('kewarganegaraan') is-invalid @enderror"
                                                     required>
                                                     <option value="">-- Pilih --</option>
-                                                    <option value="WNI">WNI</option>
-                                                    <option value="WNA">WNA</option>
+                                                    <option value="WNI"
+                                                        {{ old('kewarganegaraan') == 'WNI' ? 'selected' : '' }}>WNI
+                                                    </option>
+                                                    <option value="WNA"
+                                                        {{ old('kewarganegaraan') == 'WNA' ? 'selected' : '' }}>WNA
+                                                    </option>
                                                 </select>
                                                 @error('kewarganegaraan')
                                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -547,7 +555,6 @@
             const field = document.getElementById(fieldId);
             const btn = field.nextElementSibling;
             const icon = btn.querySelector('i');
-
             if (field.type === 'password') {
                 field.type = 'text';
                 icon.classList.remove('fa-eye-slash');
@@ -576,16 +583,28 @@
                     instansiInput.style.display = 'none';
                     jurusanSelect.style.display = 'block';
                     jurusanInput.style.display = 'none';
+                    instansiSelect.name = 'instansi';
+                    instansiInput.name = 'instansi';
+                    jurusanSelect.name = 'jurusan';
+                    jurusanInput.name = 'jurusan';
                 } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
                     instansiSelect.style.display = 'none';
                     instansiInput.style.display = 'block';
                     jurusanSelect.style.display = 'none';
                     jurusanInput.style.display = 'block';
+                    instansiSelect.name = 'instansi';
+                    instansiInput.name = 'instansi';
+                    jurusanSelect.name = 'jurusan';
+                    jurusanInput.name = 'jurusan';
                 } else {
                     instansiSelect.style.display = 'block';
                     instansiInput.style.display = 'none';
                     jurusanSelect.style.display = 'block';
                     jurusanInput.style.display = 'none';
+                    instansiSelect.name = 'instansi';
+                    instansiInput.name = 'instansi';
+                    jurusanSelect.name = 'jurusan';
+                    jurusanInput.name = 'jurusan';
                 }
             }
 

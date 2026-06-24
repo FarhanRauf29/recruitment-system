@@ -131,6 +131,9 @@ class PelamarController extends Controller
             $data['user_id'] = $user->id;
             $data['nama_lengkap'] = $request->nama_depan . ' ' . $request->nama_belakang;
 
+            $data['jurusan'] = $request->input('jurusan', '');
+            $data['instansi'] = $request->input('instansi', '');
+
             if ($request->hasFile('foto_profil')) {
                 $path = $request->file('foto_profil')->store('pelamar/profil', 'public');
                 $data['foto_profil'] = $path;
@@ -261,9 +264,8 @@ class PelamarController extends Controller
                     'nomor_whatsapp'
                 ]);
 
-                // AMBIL NILAI JURUSAN DAN INSTANSI DARI REQUEST
-                $data['jurusan'] = $request->input('jurusan');
-                $data['instansi'] = $request->input('instansi');
+                $data['jurusan'] = $request->input('jurusan', '');
+                $data['instansi'] = $request->input('instansi', '');
                 $data['nama_lengkap'] = $request->nama_depan . ' ' . $request->nama_belakang;
 
                 if ($request->hasFile('foto_profil')) {

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('berkas', function (Blueprint $table) {
@@ -27,23 +24,15 @@ return new class extends Migration
             $table->string('portofolio_file')->nullable();
             $table->string('kartu_keluarga_file')->nullable();
             $table->string('dokumen_lain_file')->nullable();
-
             $table->enum('status_verifikasi', ['Pending', 'Diterima', 'Ditolak'])->default('Pending');
-
             $table->text('catatan_admin')->nullable();
-
+            $table->timestamp('tanggal_verifikasi')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('berkas', function (Blueprint $table) {
-            $table->dropForeign(['pelamar_tahapan_id']);
-            $table->dropColumn('pelamar_tahapan_id');
-        });
+        Schema::dropIfExists('berkas');
     }
 };

@@ -195,30 +195,10 @@
                                                 @foreach ($pendidikanOptions as $value => $label)
                                                     <option value="{{ $value }}"
                                                         {{ old('pendidikan_terakhir', $pelamar->pendidikan_terakhir) == $value ? 'selected' : '' }}>
-                                                        {{ $label }}</option>
+                                                        {{ $label }}
+                                                    </option>
                                                 @endforeach
                                             </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">Jurusan</label>
-                                            <div class="input-icon">
-                                                <i class="fas fa-graduation-cap text-primary"></i>
-                                                <select name="jurusan" id="jurusan_select_pelamar"
-                                                    class="form-select rounded-3" style="padding-left: 36px;">
-                                                    <option value="">-- Pilih Jurusan --</option>
-                                                    @foreach ($jurusanOptions as $value => $label)
-                                                        <option value="{{ $value }}"
-                                                            {{ old('jurusan', $pelamar->jurusan) == $value ? 'selected' : '' }}>
-                                                            {{ $label }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                <input type="text" name="jurusan" id="jurusan_input_pelamar"
-                                                    class="form-control rounded-3"
-                                                    style="display: none; padding-left: 36px;"
-                                                    placeholder="Masukkan nama jurusan"
-                                                    value="{{ old('jurusan', $pelamar->jurusan) }}">
-                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Nama Instansi</label>
@@ -241,6 +221,29 @@
                                                     value="{{ old('instansi', $pelamar->instansi) }}">
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Jurusan</label>
+                                            <div class="input-icon">
+                                                <i class="fas fa-graduation-cap text-primary"></i>
+                                                <select name="jurusan" id="jurusan_select_pelamar"
+                                                    class="form-select rounded-3" style="padding-left: 36px;">
+                                                    <option value="">-- Pilih Jurusan --</option>
+                                                    @foreach ($jurusanOptions as $value => $label)
+                                                        <option value="{{ $value }}"
+                                                            {{ old('jurusan', $pelamar->jurusan) == $value ? 'selected' : '' }}>
+                                                            {{ $label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <input type="text" name="jurusan" id="jurusan_input_pelamar"
+                                                    class="form-control rounded-3"
+                                                    style="display: none; padding-left: 36px;"
+                                                    placeholder="Masukkan nama jurusan"
+                                                    value="{{ old('jurusan', $pelamar->jurusan) }}">
+                                            </div>
+                                        </div>
+
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-semibold">Gaji yang Diharapkan</label>
                                             <div class="input-group">
@@ -280,7 +283,7 @@
                                             <div class="row g-2 align-items-end">
                                                 <div class="col-md-2">
                                                     <label class="form-label small text-muted">Tingkat</label>
-                                                    <select name="tingkat" id="tingkat_select"
+                                                    <select name="tingkat" id="tingkat_select_pendidikan"
                                                         class="form-select rounded-3" required>
                                                         <option value="">-- Pilih --</option>
                                                         <option value="SD">SD</option>
@@ -294,7 +297,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small text-muted">Nama Instansi</label>
-                                                    <select name="instansi" id="instansi_select"
+                                                    <select name="nama_instansi" id="instansi_select_pendidikan"
                                                         class="form-select rounded-3">
                                                         <option value="">-- Pilih Instansi --</option>
                                                         @foreach ($instansiOptions as $value => $label)
@@ -302,13 +305,13 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    <input type="text" name="instansi" id="instansi_input"
-                                                        class="form-control rounded-3" style="display: none;"
-                                                        placeholder="Masukkan nama instansi">
+                                                    <input type="text" name="nama_instansi"
+                                                        id="instansi_input_pendidikan" class="form-control rounded-3"
+                                                        style="display: none;" placeholder="Masukkan nama instansi">
                                                 </div>
-                                                <div class="col-md-2" id="jurusan_container">
+                                                <div class="col-md-2">
                                                     <label class="form-label small text-muted">Jurusan</label>
-                                                    <select name="jurusan" id="jurusan_select"
+                                                    <select name="jurusan" id="jurusan_select_pendidikan"
                                                         class="form-select rounded-3">
                                                         <option value="">-- Pilih Jurusan --</option>
                                                         @foreach ($jurusanOptions as $value => $label)
@@ -316,7 +319,7 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    <input type="text" name="jurusan" id="jurusan_input"
+                                                    <input type="text" name="jurusan" id="jurusan_input_pendidikan"
                                                         class="form-control rounded-3" style="display: none;"
                                                         placeholder="Masukkan nama jurusan">
                                                 </div>
@@ -441,24 +444,23 @@
                                                         <div class="mb-3">
                                                             <label class="form-label fw-semibold">Nama Instansi</label>
                                                             @if (in_array($item->tingkat, ['SD', 'SMP', 'SMA/SMK']))
-                                                                <input type="text" name="instansi"
+                                                                <input type="text" name="nama_instansi"
                                                                     class="form-control rounded-3"
                                                                     value="{{ $item->nama_instansi }}"
                                                                     placeholder="Masukkan nama instansi">
                                                             @else
-                                                                <select name="instansi" class="form-select rounded-3">
+                                                                <select name="nama_instansi"
+                                                                    class="form-select rounded-3">
                                                                     <option value="">-- Pilih Instansi --</option>
                                                                     @foreach ($instansiOptions as $value => $label)
                                                                         <option value="{{ $value }}"
                                                                             {{ $item->nama_instansi == $value ? 'selected' : '' }}>
-                                                                            {{ $label }}
-                                                                        </option>
+                                                                            {{ $label }}</option>
                                                                     @endforeach
                                                                 </select>
                                                             @endif
                                                         </div>
-                                                        <div class="mb-3"
-                                                            id="edit_jurusan_container_{{ $item->id }}">
+                                                        <div class="mb-3">
                                                             <label class="form-label fw-semibold">Jurusan</label>
                                                             @if (in_array($item->tingkat, ['SD', 'SMP', 'SMA/SMK']))
                                                                 <input type="text" name="jurusan"
@@ -471,8 +473,7 @@
                                                                     @foreach ($jurusanOptions as $value => $label)
                                                                         <option value="{{ $value }}"
                                                                             {{ $item->jurusan == $value ? 'selected' : '' }}>
-                                                                            {{ $label }}
-                                                                        </option>
+                                                                            {{ $label }}</option>
                                                                     @endforeach
                                                                 </select>
                                                             @endif
@@ -1141,6 +1142,62 @@
             if (tingkatSelect) {
                 tingkatSelect.addEventListener('change', toggleInstansiJurusan);
                 toggleInstansiJurusan();
+            }
+
+            // Toggle untuk form tambah pendidikan
+            const tingkatSelectPendidikan = document.getElementById('tingkat_select_pendidikan');
+            const instansiSelectPendidikan = document.getElementById('instansi_select_pendidikan');
+            const instansiInputPendidikan = document.getElementById('instansi_input_pendidikan');
+            const jurusanSelectPendidikan = document.getElementById('jurusan_select_pendidikan');
+            const jurusanInputPendidikan = document.getElementById('jurusan_input_pendidikan');
+
+            const tingkatDropdownPendidikan = ['D3', 'D4', 'S1', 'S2'];
+
+            function togglePendidikanFields() {
+                const selected = tingkatSelectPendidikan ? tingkatSelectPendidikan.value : '';
+
+                if (tingkatDropdownPendidikan.includes(selected)) {
+                    instansiSelectPendidikan.style.display = 'block';
+                    instansiInputPendidikan.style.display = 'none';
+                    jurusanSelectPendidikan.style.display = 'block';
+                    jurusanInputPendidikan.style.display = 'none';
+
+                    instansiSelectPendidikan.setAttribute('required', 'required');
+                    instansiInputPendidikan.removeAttribute('required');
+                    jurusanSelectPendidikan.removeAttribute('required');
+                    jurusanInputPendidikan.removeAttribute('required');
+
+                    instansiInputPendidikan.value = '';
+                    jurusanInputPendidikan.value = '';
+                } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
+                    instansiSelectPendidikan.style.display = 'none';
+                    instansiInputPendidikan.style.display = 'block';
+                    jurusanSelectPendidikan.style.display = 'none';
+                    jurusanInputPendidikan.style.display = 'block';
+
+                    instansiSelectPendidikan.removeAttribute('required');
+                    instansiInputPendidikan.setAttribute('required', 'required');
+                    jurusanSelectPendidikan.removeAttribute('required');
+                    jurusanInputPendidikan.removeAttribute('required');
+
+                    instansiSelectPendidikan.value = '';
+                    jurusanSelectPendidikan.value = '';
+                } else {
+                    instansiSelectPendidikan.style.display = 'block';
+                    instansiInputPendidikan.style.display = 'none';
+                    jurusanSelectPendidikan.style.display = 'block';
+                    jurusanInputPendidikan.style.display = 'none';
+
+                    instansiSelectPendidikan.removeAttribute('required');
+                    instansiInputPendidikan.removeAttribute('required');
+                    jurusanSelectPendidikan.removeAttribute('required');
+                    jurusanInputPendidikan.removeAttribute('required');
+                }
+            }
+
+            if (tingkatSelectPendidikan) {
+                tingkatSelectPendidikan.addEventListener('change', togglePendidikanFields);
+                togglePendidikanFields();
             }
 
             const pendidikanTerakhirSelect = document.getElementById('pendidikan_terakhir_pelamar');
