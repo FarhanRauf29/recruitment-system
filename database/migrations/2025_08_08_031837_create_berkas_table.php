@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('berkas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pelamar_id')->constrained('pelamar')->onDelete('cascade');
-            $table->foreignId('pelamar_tahapan_id')->nullable()->constrained('pelamar_tahapan')->onDelete('set null');
+            $table->foreignId('pelamar_tahapan_id')->nullable()->constrained('pelamar_tahapan')->onDelete('cascade');
             $table->string('cv_file')->nullable();
             $table->string('surat_lamaran_file')->nullable();
             $table->string('ijazah_file')->nullable();

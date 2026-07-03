@@ -14,6 +14,14 @@
                         <p class="small mb-0 mt-1 opacity-75">Buat jadwal MCU untuk pelamar yang lolos tahap sebelumnya</p>
                     </div>
                     <div class="card-body">
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+
                         <form action="{{ route('admin.mcu.store') }}" method="POST">
                             @csrf
 
@@ -30,13 +38,21 @@
                                                 required>
                                                 <option value="">-- Pilih Pelamar --</option>
                                                 @foreach ($pelamarTahapans as $pt)
-                                                    <option value="{{ $pt->id }}">{{ $pt->pelamar->nama_lengkap }} -
+                                                    <option value="{{ $pt->id }}"
+                                                        {{ old('pelamar_tahapan_id') == $pt->id ? 'selected' : '' }}>
+                                                        {{ $pt->pelamar->nama_lengkap }} -
                                                         {{ $pt->lowongan->judul_lowongan }}
                                                         ({{ $pt->tahapan->nama_tahapan }})
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </div>
+                                        @if ($pelamarTahapans->isEmpty())
+                                            <div class="alert alert-warning mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Semua pelamar yang lolos ke tahap MCU sudah memiliki jadwal MCU.
+                                            </div>
+                                        @endif
                                         @error('pelamar_tahapan_id')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
@@ -51,7 +67,8 @@
                                             <span class="input-group-text bg-white"><i
                                                     class="fas fa-calendar-alt text-primary"></i></span>
                                             <input type="datetime-local" name="jadwal_mcu"
-                                                class="form-control @error('jadwal_mcu') is-invalid @enderror" required>
+                                                class="form-control @error('jadwal_mcu') is-invalid @enderror"
+                                                value="{{ old('jadwal_mcu') }}" required>
                                         </div>
                                         @error('jadwal_mcu')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -68,7 +85,7 @@
                                                     class="fas fa-map-marker-alt text-primary"></i></span>
                                             <input type="text" name="lokasi_mcu"
                                                 class="form-control @error('lokasi_mcu') is-invalid @enderror"
-                                                value=" " required>
+                                                value="{{ old('lokasi_mcu', '') }}" required>
                                         </div>
                                         @error('lokasi_mcu')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -82,7 +99,7 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i
                                                     class="fas fa-address-card text-primary"></i></span>
-                                            <textarea name="alamat_lokasi" class="form-control" rows="2"></textarea>
+                                            <textarea name="alamat_lokasi" class="form-control" rows="2">{{ old('alamat_lokasi') }}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -93,7 +110,8 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i
                                                     class="fas fa-hospital text-primary"></i></span>
-                                            <input type="text" name="nama_rs" class="form-control" value=" ">
+                                            <input type="text" name="nama_rs" class="form-control"
+                                                value="{{ old('nama_rs') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -105,7 +123,7 @@
                                             <span class="input-group-text bg-white"><i
                                                     class="fas fa-user-md text-primary"></i></span>
                                             <input type="text" name="dokter_pemeriksa" class="form-control"
-                                                placeholder=" ">
+                                                value="{{ old('dokter_pemeriksa') }}" placeholder="">
                                         </div>
                                     </div>
                                 </div>
@@ -117,7 +135,7 @@
                                             <span class="input-group-text bg-white"><i
                                                     class="fas fa-info-circle text-primary"></i></span>
                                             <textarea name="keterangan" class="form-control" rows="2"
-                                                placeholder="Persiapan MCU, dokumen yang perlu dibawa, dll"></textarea>
+                                                placeholder="Persiapan MCU, dokumen yang perlu dibawa, dll">{{ old('keterangan') }}</textarea>
                                         </div>
                                     </div>
                                 </div>

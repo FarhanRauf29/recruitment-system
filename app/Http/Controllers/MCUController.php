@@ -7,8 +7,6 @@ use App\Models\PelamarTahapan;
 use App\Models\Pelamar;
 use App\Models\Lowongan;
 use App\Models\TahapanRekrutmen;
-use App\Models\PenilaianKandidat;
-use App\Models\Kriteria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -77,6 +75,12 @@ class MCUController extends Controller
             ->where('status', 'diproses')
             ->get();
 
+        $existingMCU = MCU::pluck('pelamar_tahapan_id')->toArray();
+
+        $pelamarTahapans = $pelamarTahapans->filter(function ($pt) use ($existingMCU) {
+            return !in_array($pt->id, $existingMCU);
+        });
+
         return view('admin.mcu.create', compact('pelamarTahapans'));
     }
 
@@ -91,6 +95,11 @@ class MCUController extends Controller
             'dokter_pemeriksa' => 'nullable|string',
             'nama_rs' => 'nullable|string',
         ]);
+
+        $existingMCU = MCU::where('pelamar_tahapan_id', $request->pelamar_tahapan_id)->first();
+        if ($existingMCU) {
+            return redirect()->back()->with('error', 'Pelamar ini sudah memiliki jadwal MCU.')->withInput();
+        }
 
         $pelamarTahapan = PelamarTahapan::with(['pelamar', 'lowongan'])->find($request->pelamar_tahapan_id);
 
@@ -127,11 +136,27 @@ class MCUController extends Controller
         return view('pelamar.mcu.show', compact('mcu'));
     }
 
+    public function pelamarShow($id)
+    {
+        $user = Auth::user();
+        $pelamar = Pelamar::where('user_id', $user->id)->first();
+
+        if (!$pelamar) {
+            return redirect()->route('pelamar.profile')->with('error', 'Silakan lengkapi profil terlebih dahulu.');
+        }
+
+        $mcu = MCU::with(['pelamar', 'pelamarTahapan', 'lowongan'])
+            ->where('id', $id)
+            ->where('pelamar_id', $pelamar->id)
+            ->firstOrFail();
+
+        return view('pelamar.mcu.show', compact('mcu'));
+    }
+
     public function edit($id)
     {
         $mcu = MCU::findOrFail($id);
-        $pelamarTahapans = PelamarTahapan::with(['pelamar', 'lowongan'])->get();
-        return view('admin.mcu.edit', compact('mcu', 'pelamarTahapans'));
+        return view('admin.mcu.edit', compact('mcu'));
     }
 
     public function update(Request $request, $id)
@@ -141,8 +166,7 @@ class MCUController extends Controller
         $request->validate([
             'jadwal_mcu' => 'required|date',
             'lokasi_mcu' => 'required|string',
-            'status' => 'required|in:dijadwalkan,dikonfirmasi,hadir,tidak_hadir,hasil_diupload,verifikasi,lolos,gagal',
-            'kondisi_kesehatan' => 'nullable|in:Sangat Sehat,Sehat,Cukup,Kurang,Tidak Lulus',
+            'status' => 'required|in:dijadwalkan,dikonfirmasi,hadir,tidak_hadir,verifikasi,lolos,gagal',
         ]);
 
         $mcu->update([
@@ -154,108 +178,166 @@ class MCUController extends Controller
             'dokter_pemeriksa' => $request->dokter_pemeriksa,
             'nama_rs' => $request->nama_rs,
             'catatan_admin' => $request->catatan_admin,
-            'kondisi_kesehatan' => $request->kondisi_kesehatan,
-            'nilai_mcu' => $this->getNilaiFromKondisi($request->kondisi_kesehatan),
         ]);
 
         if ($request->status == 'lolos') {
-            $pelamarTahapan = PelamarTahapan::find($mcu->pelamar_tahapan_id);
-            $pelamarTahapan->status = 'lolos';
-            $pelamarTahapan->tanggal_selesai = now();
-            $pelamarTahapan->save();
-
-            $this->saveNilaiToPenilaianKandidat($mcu->pelamar_id, $mcu->lowongan_id, $mcu->nilai_mcu);
-
-            $nextTahapans = TahapanRekrutmen::where('urutan', '>', $pelamarTahapan->tahapan->urutan)->get();
-            foreach ($nextTahapans as $tahapan) {
-                PelamarTahapan::firstOrCreate([
-                    'pelamar_id' => $mcu->pelamar_id,
-                    'lowongan_id' => $mcu->lowongan_id,
-                    'tahapan_id' => $tahapan->id,
-                ], [
-                    'status' => 'diproses',
-                    'tanggal_mulai' => now(),
-                ]);
-            }
+            $this->lanjutkanKeTahapanSelanjutnya($mcu);
         } elseif ($request->status == 'gagal') {
             $pelamarTahapan = PelamarTahapan::find($mcu->pelamar_tahapan_id);
-            $pelamarTahapan->status = 'gagal';
-            $pelamarTahapan->tanggal_selesai = now();
-            $pelamarTahapan->save();
+            if ($pelamarTahapan) {
+                $pelamarTahapan->status = 'gagal';
+                $pelamarTahapan->tanggal_selesai = now();
+                $pelamarTahapan->save();
+            }
         }
 
         return redirect()->route('admin.mcu.index')->with('success', 'Data MCU berhasil diperbarui.');
     }
 
-    private function getNilaiFromKondisi($kondisi)
+    public function inputHasil($id)
     {
-        $nilaiMap = [
-            'Sangat Sehat' => 100,
-            'Sehat' => 85,
-            'Cukup' => 70,
-            'Kurang' => 50,
-            'Tidak Lulus' => 0,
-        ];
-        return $nilaiMap[$kondisi] ?? 0;
+        $mcu = MCU::with(['pelamar', 'lowongan'])->findOrFail($id);
+        return view('admin.mcu.input_hasil', compact('mcu'));
     }
 
-    private function saveNilaiToPenilaianKandidat($pelamarId, $lowonganId, $nilai)
-    {
-        $kriteriaMCU = Kriteria::where('nama_kriteria', 'like', '%MCU%')
-            ->orWhere('nama_kriteria', 'like', '%Medical%')
-            ->orWhere('kode_kriteria', 'C3')
-            ->first();
-
-        if ($kriteriaMCU) {
-            PenilaianKandidat::updateOrCreate(
-                [
-                    'pelamar_id' => $pelamarId,
-                    'lowongan_id' => $lowonganId,
-                    'kriteria_id' => $kriteriaMCU->id,
-                ],
-                [
-                    'nilai' => $nilai,
-                    'catatan' => 'Nilai MCU otomatis dari kondisi kesehatan: ' . ($this->getKondisiFromNilai($nilai) ?? '-'),
-                ]
-            );
-        }
-    }
-
-    private function getKondisiFromNilai($nilai)
-    {
-        if ($nilai >= 90) return 'Sangat Sehat';
-        if ($nilai >= 75) return 'Sehat';
-        if ($nilai >= 60) return 'Cukup';
-        if ($nilai >= 30) return 'Kurang';
-        return 'Tidak Lulus';
-    }
-
-    public function uploadHasil(Request $request, $id)
+    public function storeHasil(Request $request, $id)
     {
         $mcu = MCU::findOrFail($id);
 
         $request->validate([
-            'hasil_mcu_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'hasil_mcu_keterangan' => 'nullable|string',
-            'kondisi_kesehatan' => 'nullable|in:Sangat Sehat,Sehat,Cukup,Kurang,Tidak Lulus',
+            'tinggi_badan' => 'nullable|numeric',
+            'berat_badan' => 'nullable|numeric',
+            'bmi' => 'nullable|numeric',
+            'tekanan_darah' => 'nullable|string',
+            'visus_mata' => 'nullable|string',
+            'buta_warna' => 'nullable|in:Tidak,Parsial,Total',
+            'hasil_narkoba' => 'nullable|in:Negatif,Positif',
+            'riwayat_penyakit' => 'nullable|string',
         ]);
 
-        if ($mcu->hasil_mcu_file && Storage::disk('public')->exists($mcu->hasil_mcu_file)) {
-            Storage::disk('public')->delete($mcu->hasil_mcu_file);
+        $mcu->update([
+            'tinggi_badan' => $request->tinggi_badan,
+            'berat_badan' => $request->berat_badan,
+            'bmi' => $request->bmi,
+            'tekanan_darah' => $request->tekanan_darah,
+            'visus_mata' => $request->visus_mata,
+            'buta_warna' => $request->buta_warna,
+            'hasil_narkoba' => $request->hasil_narkoba,
+            'riwayat_penyakit' => $request->riwayat_penyakit,
+            'status' => 'hadir',
+        ]);
+
+        $hasil = $mcu->getStatusKesehatan();
+
+        $skorAsli = $hasil['skor'];
+        if ($skorAsli > 100) {
+            $skorFinal = $skorAsli / 100;
+        } else {
+            $skorFinal = $skorAsli;
         }
 
-        $file = $request->file('hasil_mcu_file');
-        $fileName = time() . '_hasil_mcu.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('mcu/hasil', $fileName, 'public');
+        $statusKesehatan = $this->getStatusKesehatanBySkor($skorFinal);
 
-        $mcu->hasil_mcu_file = $path;
-        $mcu->hasil_mcu_keterangan = $request->hasil_mcu_keterangan;
-        $mcu->status = 'hasil_diupload';
-        $mcu->kondisi_kesehatan = $request->kondisi_kesehatan;
-        $mcu->nilai_mcu = $this->getNilaiFromKondisi($request->kondisi_kesehatan);
+        $mcu->kondisi_kesehatan = $statusKesehatan;
+        $mcu->nilai_mcu = $skorFinal;
         $mcu->save();
 
-        return redirect()->route('admin.mcu.show', $id)->with('success', 'Hasil MCU berhasil diupload.');
+        $this->autoVerifikasiMCU($mcu);
+
+        $skorFormatted = number_format($mcu->nilai_mcu, 2, ',', '.');
+
+        return redirect()->route('admin.mcu.show', $mcu->id)->with('success', 'Hasil MCU berhasil disimpan. Skor: ' . $skorFormatted . ' - ' . $statusKesehatan);
+    }
+
+    private function getStatusKesehatanBySkor($skor)
+    {
+        if ($skor >= 95) {
+            return 'Sangat Sehat';
+        } elseif ($skor >= 85) {
+            return 'Sehat';
+        } elseif ($skor >= 70) {
+            return 'Cukup Sehat';
+        } elseif ($skor >= 50) {
+            return 'Kurang Sehat';
+        } else {
+            return 'Tidak Sehat';
+        }
+    }
+
+    private function autoVerifikasiMCU($mcu)
+    {
+        $skor = $mcu->nilai_mcu;
+
+        DB::beginTransaction();
+
+        try {
+            if ($skor >= 25) {
+                $mcu->status = 'lolos';
+                $mcu->tanggal_verifikasi = now();
+                $mcu->save();
+
+                $this->lanjutkanKeTahapanSelanjutnya($mcu);
+            } else {
+                $mcu->status = 'gagal';
+                $mcu->tanggal_verifikasi = now();
+                $mcu->save();
+
+                $pelamarTahapan = PelamarTahapan::find($mcu->pelamar_tahapan_id);
+                if ($pelamarTahapan) {
+                    $pelamarTahapan->status = 'gagal';
+                    $pelamarTahapan->tanggal_selesai = now();
+                    $pelamarTahapan->save();
+                }
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    private function lanjutkanKeTahapanSelanjutnya($mcu)
+    {
+        $pelamarTahapan = PelamarTahapan::with(['tahapan'])->find($mcu->pelamar_tahapan_id);
+
+        if (!$pelamarTahapan) {
+            return;
+        }
+
+        $pelamarTahapan->status = 'lolos';
+        $pelamarTahapan->tanggal_selesai = now();
+        $pelamarTahapan->save();
+
+        $urutanSekarang = $pelamarTahapan->tahapan->urutan;
+
+        $nextTahapans = TahapanRekrutmen::where('urutan', '>', $urutanSekarang)
+            ->orderBy('urutan', 'asc')
+            ->get();
+
+        foreach ($nextTahapans as $tahapan) {
+            $existing = PelamarTahapan::where([
+                'pelamar_id' => $mcu->pelamar_id,
+                'lowongan_id' => $mcu->lowongan_id,
+                'tahapan_id' => $tahapan->id,
+            ])->first();
+
+            if (!$existing) {
+                PelamarTahapan::create([
+                    'pelamar_id' => $mcu->pelamar_id,
+                    'lowongan_id' => $mcu->lowongan_id,
+                    'tahapan_id' => $tahapan->id,
+                    'status' => 'diproses',
+                    'tanggal_mulai' => now(),
+                ]);
+            } else {
+                if ($existing->status == 'menunggu' || $existing->status == 'belum') {
+                    $existing->status = 'diproses';
+                    $existing->tanggal_mulai = now();
+                    $existing->save();
+                }
+            }
+        }
     }
 
     public function verifikasi(Request $request, $id)
@@ -265,7 +347,6 @@ class MCUController extends Controller
         $request->validate([
             'status' => 'required|in:lolos,gagal',
             'catatan_admin' => 'nullable|string',
-            'kondisi_kesehatan' => 'nullable|in:Sangat Sehat,Sehat,Cukup,Kurang,Tidak Lulus',
         ]);
 
         DB::beginTransaction();
@@ -274,26 +355,17 @@ class MCUController extends Controller
             $mcu->status = $request->status;
             $mcu->catatan_admin = $request->catatan_admin;
             $mcu->tanggal_verifikasi = now();
-            if ($request->kondisi_kesehatan) {
-                $mcu->kondisi_kesehatan = $request->kondisi_kesehatan;
-                $mcu->nilai_mcu = $this->getNilaiFromKondisi($request->kondisi_kesehatan);
-            }
             $mcu->save();
 
-            if ($mcu->nilai_mcu) {
-                $this->saveNilaiToPenilaianKandidat($mcu->pelamar_id, $mcu->lowongan_id, $mcu->nilai_mcu);
-            }
-
-            $pelamarTahapan = PelamarTahapan::find($mcu->pelamar_tahapan_id);
-
             if ($request->status == 'lolos') {
-                $pelamarTahapan->status = 'lolos';
-                $pelamarTahapan->tanggal_selesai = now();
-                $pelamarTahapan->save();
+                $this->lanjutkanKeTahapanSelanjutnya($mcu);
             } else {
-                $pelamarTahapan->status = 'gagal';
-                $pelamarTahapan->tanggal_selesai = now();
-                $pelamarTahapan->save();
+                $pelamarTahapan = PelamarTahapan::find($mcu->pelamar_tahapan_id);
+                if ($pelamarTahapan) {
+                    $pelamarTahapan->status = 'gagal';
+                    $pelamarTahapan->tanggal_selesai = now();
+                    $pelamarTahapan->save();
+                }
             }
 
             DB::commit();
@@ -305,27 +377,59 @@ class MCUController extends Controller
         }
     }
 
-    public function cetakSurat($id)
+    public function generateSuratHasil($id)
+    {
+        try {
+            $mcu = MCU::findOrFail($id);
+
+            if (!$mcu->surat_mcu_file || !Storage::disk('public')->exists($mcu->surat_mcu_file)) {
+                $path = $mcu->generateSuratHasilMCU();
+                $mcu->surat_mcu_file = $path;
+                $mcu->save();
+            } else {
+                $path = $mcu->surat_mcu_file;
+            }
+
+            if (!Storage::disk('public')->exists($path)) {
+                return redirect()->back()->with('error', 'File surat tidak ditemukan. Silakan coba lagi.');
+            }
+
+            return response()->download(storage_path('app/public/' . $path));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengunduh surat: ' . $e->getMessage());
+        }
+    }
+
+    public function generateSuratPanggilan($id)
+    {
+        try {
+            $mcu = MCU::findOrFail($id);
+
+            if (!$mcu->surat_panggilan_file || !Storage::disk('public')->exists($mcu->surat_panggilan_file)) {
+                $path = $mcu->generateSuratPanggilan();
+                $mcu->surat_panggilan_file = $path;
+                $mcu->save();
+            } else {
+                $path = $mcu->surat_panggilan_file;
+            }
+
+            if (!Storage::disk('public')->exists($path)) {
+                return redirect()->back()->with('error', 'File surat panggilan tidak ditemukan. Silakan coba lagi.');
+            }
+
+            return response()->download(storage_path('app/public/' . $path));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengunduh surat panggilan: ' . $e->getMessage());
+        }
+    }
+
+    public function cetakSuratPanggilan($id)
     {
         $mcu = MCU::with(['pelamar', 'lowongan'])->findOrFail($id);
-        $content = view('admin.mcu.surat', compact('mcu'))->render();
-        return response($content)->header('Content-Type', 'text/html');
+        return view('admin.mcu.surat_panggilan_preview', compact('mcu'));
     }
 
-    public function generateSurat($id)
-    {
-        $mcu = MCU::findOrFail($id);
-
-        if (!$mcu->surat_mcu_file || !Storage::disk('public')->exists($mcu->surat_mcu_file)) {
-            $path = $mcu->generateSuratMCU();
-        } else {
-            $path = $mcu->surat_mcu_file;
-        }
-
-        return response()->download(storage_path('app/public/' . $path));
-    }
-
-    public function konfirmasi($id)
+    public function downloadSurat($id)
     {
         $pelamar = Pelamar::where('user_id', Auth::id())->first();
 
@@ -337,13 +441,61 @@ class MCUController extends Controller
             ->where('pelamar_id', $pelamar->id)
             ->firstOrFail();
 
-        if ($mcu->status == 'dijadwalkan') {
-            $mcu->status = 'dikonfirmasi';
-            $mcu->save();
-            return redirect()->route('pelamar.mcu.show', $id)->with('success', 'Konfirmasi kehadiran MCU berhasil.');
+        try {
+            if (in_array($mcu->status, ['dijadwalkan', 'dikonfirmasi'])) {
+                $path = $mcu->generateSuratPanggilan();
+                $mcu->surat_panggilan_file = $path;
+                $mcu->save();
+
+                if ($mcu->surat_panggilan_file && Storage::disk('public')->exists($mcu->surat_panggilan_file)) {
+                    return response()->download(storage_path('app/public/' . $mcu->surat_panggilan_file));
+                }
+            } else {
+                if (!$mcu->surat_mcu_file || !Storage::disk('public')->exists($mcu->surat_mcu_file)) {
+                    $path = $mcu->generateSuratHasilMCU();
+                    $mcu->surat_mcu_file = $path;
+                    $mcu->save();
+                }
+
+                if ($mcu->surat_mcu_file && Storage::disk('public')->exists($mcu->surat_mcu_file)) {
+                    return response()->download(storage_path('app/public/' . $mcu->surat_mcu_file));
+                }
+            }
+
+            return redirect()->back()->with('error', 'File surat tidak ditemukan. Silakan coba lagi.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengunduh surat: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadSuratHasil($id)
+    {
+        $pelamar = Pelamar::where('user_id', Auth::id())->first();
+
+        if (!$pelamar) {
+            return redirect()->route('pelamar.profile')->with('error', 'Silakan lengkapi profil terlebih dahulu.');
         }
 
-        return redirect()->route('pelamar.mcu.show', $id)->with('error', 'Tidak dapat mengkonfirmasi jadwal ini.');
+        $mcu = MCU::where('id', $id)
+            ->where('pelamar_id', $pelamar->id)
+            ->firstOrFail();
+
+        try {
+            if (!$mcu->surat_mcu_file || !Storage::disk('public')->exists($mcu->surat_mcu_file)) {
+                $path = $mcu->generateSuratHasilMCU();
+                $mcu->surat_mcu_file = $path;
+                $mcu->save();
+                $mcu->refresh();
+            }
+
+            if ($mcu->surat_mcu_file && Storage::disk('public')->exists($mcu->surat_mcu_file)) {
+                return response()->download(storage_path('app/public/' . $mcu->surat_mcu_file));
+            }
+
+            return redirect()->back()->with('error', 'File surat hasil tidak ditemukan. Silakan coba lagi.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengunduh surat hasil: ' . $e->getMessage());
+        }
     }
 
     public function uploadDokumen(Request $request, $id)
@@ -376,7 +528,7 @@ class MCUController extends Controller
         return redirect()->route('pelamar.mcu.show', $id)->with('success', 'Dokumen pendukung berhasil diupload.');
     }
 
-    public function downloadSurat($id)
+    public function konfirmasi($id)
     {
         $pelamar = Pelamar::where('user_id', Auth::id())->first();
 
@@ -388,56 +540,25 @@ class MCUController extends Controller
             ->where('pelamar_id', $pelamar->id)
             ->firstOrFail();
 
-        try {
-            if (!$mcu->surat_mcu_file || !Storage::disk('public')->exists($mcu->surat_mcu_file)) {
-                $mcu->generateSuratMCU();
-                $mcu->refresh();
-            }
-
-            if ($mcu->surat_mcu_file && Storage::disk('public')->exists($mcu->surat_mcu_file)) {
-                return response()->download(storage_path('app/public/' . $mcu->surat_mcu_file));
-            } else {
-                return redirect()->back()->with('error', 'File surat tidak ditemukan. Silakan coba lagi.');
-            }
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengunduh surat: ' . $e->getMessage());
-        }
-    }
-
-    public function viewFile($id, $field)
-    {
-        $mcu = MCU::findOrFail($id);
-
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Login diperlukan.');
+        if ($mcu->status == 'dijadwalkan') {
+            $mcu->status = 'dikonfirmasi';
+            $mcu->save();
+            return redirect()->route('pelamar.mcu.show', $id)->with('success', 'Konfirmasi kehadiran MCU berhasil.');
         }
 
-        $isAdmin = $user->isAdmin();
-        $isOwner = $user->pelamar && $mcu->pelamar_id == $user->pelamar->id;
-
-        if (!$isAdmin && !$isOwner) {
-            abort(403, 'Akses ditolak.');
-        }
-
-        if ($mcu->$field && Storage::disk('public')->exists($mcu->$field)) {
-            $path = storage_path('app/public/' . $mcu->$field);
-            return response()->file($path);
-        }
-
-        abort(404, 'File tidak ditemukan.');
+        return redirect()->route('pelamar.mcu.show', $id)->with('error', 'Tidak dapat mengkonfirmasi jadwal ini.');
     }
 
     public function destroy($id)
     {
         $mcu = MCU::findOrFail($id);
 
-        if ($mcu->hasil_mcu_file && Storage::disk('public')->exists($mcu->hasil_mcu_file)) {
-            Storage::disk('public')->delete($mcu->hasil_mcu_file);
-        }
-
         if ($mcu->surat_mcu_file && Storage::disk('public')->exists($mcu->surat_mcu_file)) {
             Storage::disk('public')->delete($mcu->surat_mcu_file);
+        }
+
+        if ($mcu->surat_panggilan_file && Storage::disk('public')->exists($mcu->surat_panggilan_file)) {
+            Storage::disk('public')->delete($mcu->surat_panggilan_file);
         }
 
         if ($mcu->dokumen_pendukung_file && Storage::disk('public')->exists($mcu->dokumen_pendukung_file)) {
@@ -447,5 +568,26 @@ class MCUController extends Controller
         $mcu->delete();
 
         return redirect()->route('admin.mcu.index')->with('success', 'Data MCU berhasil dihapus.');
+    }
+
+    public function getFormattedSkor($id)
+    {
+        $mcu = MCU::findOrFail($id);
+        $skor = $mcu->nilai_mcu;
+
+        if ($skor !== null) {
+            if ($skor > 100) {
+                $skor = $skor / 100;
+            }
+            $skorFormatted = number_format($skor, 2, ',', '.');
+        } else {
+            $skorFormatted = '-';
+        }
+
+        return response()->json([
+            'skor' => $skor,
+            'skor_formatted' => $skorFormatted,
+            'kondisi_kesehatan' => $mcu->kondisi_kesehatan
+        ]);
     }
 }

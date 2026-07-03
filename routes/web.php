@@ -108,11 +108,13 @@ Route::prefix('admin')->middleware(['auth', 'is_admin'])->name('admin.')->group(
 
     //MCU
     Route::resource('mcu', MCUController::class);
-    Route::post('/mcu/{id}/upload-hasil', [MCUController::class, 'uploadHasil'])->name('mcu.upload-hasil');
-    Route::put('/mcu/{id}/verifikasi', [MCUController::class, 'verifikasi'])->name('mcu.verifikasi');
-    Route::get('/mcu/{id}/cetak-surat', [MCUController::class, 'cetakSurat'])->name('mcu.cetak-surat');
-    Route::get('/mcu/{id}/generate-surat', [MCUController::class, 'generateSurat'])->name('mcu.generate-surat');
-
+    Route::get('mcu/{id}/input_hasil', [MCUController::class, 'inputHasil'])->name('mcu.input_hasil');
+    Route::post('mcu/{id}/store_hasil', [MCUController::class, 'storeHasil'])->name('mcu.store_hasil');
+    Route::post('mcu/{id}/verifikasi', [MCUController::class, 'verifikasi'])->name('mcu.verifikasi');
+    Route::get('mcu/{id}/generate_surat_hasil', [MCUController::class, 'generateSuratHasil'])->name('mcu.surat_hasil');
+    Route::get('mcu/{id}/generate_surat_panggilan', [MCUController::class, 'generateSuratPanggilan'])->name('mcu.surat_panggilan');
+    Route::get('mcu/{id}/cetak_surat_panggilan', [MCUController::class, 'cetakSuratPanggilan'])->name('mcu.cetak_surat_panggilan');
+    Route::get('mcu/{id}/api_skor', [MCUController::class, 'getFormattedSkor'])->name('mcu.api_skor');
     //Wawancara
     Route::resource('wawancara', WawancaraController::class);
     Route::put('/wawancara/{id}/nilai', [WawancaraController::class, 'nilai'])->name('wawancara.nilai');
@@ -254,11 +256,12 @@ Route::prefix('pelamar')->middleware(['auth', 'is_pelamar'])->name('pelamar.')->
     Route::get('/psikotes', [SoalPsikotesController::class, 'showForPelamar'])->name('psikotes.index');
 
     //MCU
-    Route::get('/mcu', [MCUController::class, 'index'])->name('mcu.index');
-    Route::get('/mcu/{id}', [MCUController::class, 'show'])->name('mcu.show');
-    Route::post('/mcu/{id}/upload-dokumen', [MCUController::class, 'uploadDokumen'])->name('mcu.upload-dokumen');
-    Route::post('/mcu/{id}/konfirmasi', [MCUController::class, 'konfirmasi'])->name('mcu.konfirmasi');
-    Route::get('/mcu/{id}/download-surat', [MCUController::class, 'downloadSurat'])->name('mcu.download-surat');
+    Route::get('mcu', [MCUController::class, 'index'])->name('mcu.index');
+    Route::get('mcu/{id}', [MCUController::class, 'pelamarShow'])->name('mcu.show');
+    Route::get('mcu/{id}/download_surat', [MCUController::class, 'downloadSurat'])->name('mcu.download_surat');
+    Route::get('mcu/{id}/download_surat_hasil', [MCUController::class, 'downloadSuratHasil'])->name('mcu.download_surat_hasil');
+    Route::post('mcu/{id}/upload_dokumen', [MCUController::class, 'uploadDokumen'])->name('mcu.upload_dokumen');
+    Route::post('mcu/{id}/konfirmasi', [MCUController::class, 'konfirmasi'])->name('mcu.konfirmasi');
 
     //Wawancara
     Route::get('/wawancara', [WawancaraController::class, 'index'])->name('wawancara.index');

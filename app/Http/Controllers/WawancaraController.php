@@ -75,6 +75,12 @@ class WawancaraController extends Controller
             ->where('status', 'diproses')
             ->get();
 
+        $existingWawancara = Wawancara::pluck('pelamar_tahapan_id')->toArray();
+
+        $pelamarTahapans = $pelamarTahapans->filter(function ($pt) use ($existingWawancara) {
+            return !in_array($pt->id, $existingWawancara);
+        });
+
         return view('admin.wawancara.create', compact('pelamarTahapans'));
     }
 
@@ -92,6 +98,11 @@ class WawancaraController extends Controller
         ]);
 
         try {
+            $existingWawancara = Wawancara::where('pelamar_tahapan_id', $request->pelamar_tahapan_id)->first();
+            if ($existingWawancara) {
+                return redirect()->back()->withInput()->with('error', 'Pelamar ini sudah memiliki jadwal wawancara.');
+            }
+
             $pelamarTahapan = PelamarTahapan::with(['pelamar', 'lowongan'])->find($request->pelamar_tahapan_id);
 
             if (!$pelamarTahapan) {
@@ -174,6 +185,34 @@ class WawancaraController extends Controller
                     $pelamarTahapan->status = 'lolos';
                     $pelamarTahapan->tanggal_selesai = now();
                     $pelamarTahapan->save();
+
+                    $nextTahapans = TahapanRekrutmen::where('urutan', '>', $pelamarTahapan->tahapan->urutan)
+                        ->orderBy('urutan', 'asc')
+                        ->get();
+
+                    foreach ($nextTahapans as $tahapan) {
+                        $existing = PelamarTahapan::where([
+                            'pelamar_id' => $wawancara->pelamar_id,
+                            'lowongan_id' => $wawancara->lowongan_id,
+                            'tahapan_id' => $tahapan->id,
+                        ])->first();
+
+                        if (!$existing) {
+                            PelamarTahapan::create([
+                                'pelamar_id' => $wawancara->pelamar_id,
+                                'lowongan_id' => $wawancara->lowongan_id,
+                                'tahapan_id' => $tahapan->id,
+                                'status' => 'diproses',
+                                'tanggal_mulai' => now(),
+                            ]);
+                        } else {
+                            if ($existing->status == 'menunggu' || $existing->status == 'belum') {
+                                $existing->status = 'diproses';
+                                $existing->tanggal_mulai = now();
+                                $existing->save();
+                            }
+                        }
+                    }
                 }
             } elseif ($request->status == 'gagal') {
                 $pelamarTahapan = PelamarTahapan::find($wawancara->pelamar_tahapan_id);
@@ -260,6 +299,34 @@ class WawancaraController extends Controller
                     $pelamarTahapan->status = 'lolos';
                     $pelamarTahapan->tanggal_selesai = now();
                     $pelamarTahapan->save();
+
+                    $nextTahapans = TahapanRekrutmen::where('urutan', '>', $pelamarTahapan->tahapan->urutan)
+                        ->orderBy('urutan', 'asc')
+                        ->get();
+
+                    foreach ($nextTahapans as $tahapan) {
+                        $existing = PelamarTahapan::where([
+                            'pelamar_id' => $wawancara->pelamar_id,
+                            'lowongan_id' => $wawancara->lowongan_id,
+                            'tahapan_id' => $tahapan->id,
+                        ])->first();
+
+                        if (!$existing) {
+                            PelamarTahapan::create([
+                                'pelamar_id' => $wawancara->pelamar_id,
+                                'lowongan_id' => $wawancara->lowongan_id,
+                                'tahapan_id' => $tahapan->id,
+                                'status' => 'diproses',
+                                'tanggal_mulai' => now(),
+                            ]);
+                        } else {
+                            if ($existing->status == 'menunggu' || $existing->status == 'belum') {
+                                $existing->status = 'diproses';
+                                $existing->tanggal_mulai = now();
+                                $existing->save();
+                            }
+                        }
+                    }
                 } else {
                     $pelamarTahapan->status = 'gagal';
                     $pelamarTahapan->tanggal_selesai = now();

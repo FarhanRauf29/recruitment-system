@@ -24,6 +24,7 @@
                             </a>
                         </div>
                     </div>
+
                     <div class="card-body">
                         @if (session('success'))
                             <div class="alert alert-success alert-dismissible fade show">
@@ -63,8 +64,8 @@
                                     <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                                     <div class="info-content">
                                         <small class="text-muted d-block">Tanggal MCU</small>
-                                        <h6 class="mb-0">{{ Carbon\Carbon::parse($mcu->jadwal_mcu)->format('l, d F Y') }}
-                                        </h6>
+                                        <h6 class="mb-0">
+                                            {{ Carbon\Carbon::parse($mcu->jadwal_mcu)->translatedFormat('l, d F Y') }}</h6>
                                     </div>
                                 </div>
                             </div>
@@ -100,35 +101,6 @@
                                     </div>
                                 </div>
                             </div>
-                            @if ($mcu->kondisi_kesehatan)
-                                <div class="col-md-6">
-                                    <div class="info-card">
-                                        <div class="info-icon"><i class="fas fa-stethoscope"></i></div>
-                                        <div class="info-content">
-                                            <small class="text-muted d-block">Kondisi Kesehatan</small>
-                                            <h6 class="mb-0">
-                                                <span
-                                                    class="badge bg-{{ $mcu->kondisi_kesehatan == 'Sangat Sehat' ? 'success' : ($mcu->kondisi_kesehatan == 'Sehat' ? 'primary' : ($mcu->kondisi_kesehatan == 'Cukup' ? 'warning' : 'danger')) }} px-3 py-2">
-                                                    {{ $mcu->kondisi_kesehatan }}
-                                                </span>
-                                            </h6>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                            @if ($mcu->nilai_mcu)
-                                <div class="col-md-6">
-                                    <div class="info-card">
-                                        <div class="info-icon"><i class="fas fa-chart-line"></i></div>
-                                        <div class="info-content">
-                                            <small class="text-muted d-block">Nilai MCU</small>
-                                            <h6 class="mb-0">
-                                                <span class="badge bg-primary px-3 py-2">{{ $mcu->nilai_mcu }}</span>
-                                            </h6>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
                             @if ($mcu->dokter_pemeriksa)
                                 <div class="col-md-6">
                                     <div class="info-card">
@@ -151,146 +123,159 @@
                                     </div>
                                 </div>
                             @endif
+                            @if ($mcu->kondisi_kesehatan)
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <div class="info-icon"><i class="fas fa-stethoscope"></i></div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Kondisi Kesehatan</small>
+                                            <h6 class="mb-0">
+                                                <span
+                                                    class="badge bg-{{ $mcu->kondisi_kesehatan == 'Sangat Sehat' ? 'success' : ($mcu->kondisi_kesehatan == 'Sehat' ? 'primary' : ($mcu->kondisi_kesehatan == 'Cukup Sehat' ? 'warning' : 'danger')) }} px-3 py-2">
+                                                    {{ $mcu->kondisi_kesehatan }}
+                                                </span>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if ($mcu->nilai_mcu)
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <div class="info-icon"><i class="fas fa-chart-line"></i></div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Skor MCU</small>
+                                            <h6 class="mb-0">
+                                                <span class="badge bg-primary px-3 py-2">
+                                                    @php
+                                                        $skorTampil = $mcu->nilai_mcu;
+                                                        if ($skorTampil > 100) {
+                                                            $skorTampil = $skorTampil / 100;
+                                                        }
+                                                        echo number_format($skorTampil, 2, ',', '.');
+                                                    @endphp
+                                                </span>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if ($mcu->keterangan)
+                                <div class="col-12">
+                                    <div class="info-card full-width">
+                                        <div class="info-icon"><i class="fas fa-info-circle"></i></div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Keterangan Tambahan</small>
+                                            <p class="mb-0">{{ $mcu->keterangan }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if ($mcu->catatan_admin)
+                                <div class="col-12">
+                                    <div class="info-card full-width">
+                                        <div class="info-icon"><i class="fas fa-sticky-note"></i></div>
+                                        <div class="info-content">
+                                            <small class="text-muted d-block">Catatan Admin</small>
+                                            <p class="mb-0">{{ $mcu->catatan_admin }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
-
-                        @if ($mcu->keterangan)
-                            <div class="info-card full-width mt-2">
-                                <div class="info-icon"><i class="fas fa-info-circle"></i></div>
-                                <div class="info-content">
-                                    <small class="text-muted d-block">Keterangan Tambahan</small>
-                                    <p class="mb-0">{{ $mcu->keterangan }}</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if ($mcu->catatan_admin)
-                            <div class="info-card full-width mt-2">
-                                <div class="info-icon"><i class="fas fa-sticky-note"></i></div>
-                                <div class="info-content">
-                                    <small class="text-muted d-block">Catatan Admin</small>
-                                    <p class="mb-0">{{ $mcu->catatan_admin }}</p>
-                                </div>
-                            </div>
-                        @endif
 
                         <hr class="my-4">
 
-                        @if ($mcu->hasil_mcu_file || $mcu->dokumen_pendukung_file || $mcu->surat_mcu_file)
-                            <div class="detail-section">
-                                <div class="detail-header">
-                                    <i class="fas fa-folder-open"></i>
-                                    <h6 class="mb-0">Dokumen MCU</h6>
-                                </div>
-                                <div class="detail-body">
-                                    <div class="d-flex flex-wrap gap-3">
-                                        @if ($mcu->hasil_mcu_file)
-                                            <a href="{{ route('file.view', ['model' => 'mcu', 'id' => $mcu->id, 'field' => 'hasil_mcu_file']) }}"
-                                                target="_blank" class="btn btn-outline-danger btn-sm">
-                                                <i class="fas fa-file-pdf me-1"></i> Hasil MCU
-                                            </a>
-                                        @endif
-                                        @if ($mcu->dokumen_pendukung_file)
-                                            <a href="{{ route('file.view', ['model' => 'mcu', 'id' => $mcu->id, 'field' => 'dokumen_pendukung_file']) }}"
-                                                target="_blank" class="btn btn-outline-info btn-sm">
-                                                <i class="fas fa-paperclip me-1"></i> Dokumen Pendukung
-                                            </a>
-                                        @endif
-                                        @if ($mcu->surat_mcu_file)
-                                            <a href="{{ route('admin.mcu.generate-surat', $mcu->id) }}"
-                                                class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-print me-1"></i> Cetak Surat MCU
-                                            </a>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+                        <h5 class="text-primary mb-3"><i class="fas fa-clipboard-list me-2"></i>Hasil Pemeriksaan</h5>
 
-                        <div class="detail-section">
-                            <div class="detail-header">
-                                <i class="fas fa-upload"></i>
-                                <h6 class="mb-0">Upload Hasil MCU</h6>
-                            </div>
-                            <div class="detail-body">
-                                <form action="{{ route('admin.mcu.upload-hasil', $mcu->id) }}" method="POST"
-                                    enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">File Hasil MCU</label>
-                                            <input type="file" name="hasil_mcu_file" class="form-control"
-                                                accept=".pdf,.jpg,.jpeg,.png" required>
-                                            <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max 5MB)</small>
-                                        </div>
-                                        {{-- <div class="col-md-3">
-                                            <label class="form-label fw-semibold">Kondisi Kesehatan</label>
-                                            <select name="kondisi_kesehatan" class="form-select">
-                                                <option value="">-- Pilih Kondisi --</option>
-                                                <option value="Sangat Sehat">Sangat Sehat </option>
-                                                <option value="Sehat">Sehat </option>
-                                                <option value="Cukup">Cukup </option>
-                                                <option value="Kurang">Kurang </option>
-                                                <option value="Tidak Lulus">Tidak Lulus </option>
-                                            </select>
-                                        </div> --}}
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">Keterangan Hasil</label>
-                                            <input type="text" name="hasil_mcu_keterangan" class="form-control"
-                                                placeholder="Keterangan hasil">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label fw-semibold">&nbsp;</label>
-                                            <button type="submit" class="btn btn-primary w-100">
-                                                <i class="fas fa-upload me-1"></i> Upload
-                                            </button>
-                                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-weight"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Tinggi Badan</small>
+                                        <h6 class="mb-0">{{ $mcu->tinggi_badan ? $mcu->tinggi_badan . ' cm' : '-' }}
+                                        </h6>
                                     </div>
-                                </form>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-weight"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Berat Badan</small>
+                                        <h6 class="mb-0">{{ $mcu->berat_badan ? $mcu->berat_badan . ' kg' : '-' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-calculator"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">BMI</small>
+                                        <h6 class="mb-0">{{ $mcu->bmi ?? '-' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-heart"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Tekanan Darah</small>
+                                        <h6 class="mb-0">{{ $mcu->tekanan_darah ?? '-' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-eye"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Visus Mata</small>
+                                        <h6 class="mb-0">{{ $mcu->visus_mata ?? '-' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-eye"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Buta Warna</small>
+                                        <h6 class="mb-0">{{ $mcu->buta_warna ?? '-' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-syringe"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Hasil Narkoba</small>
+                                        <h6 class="mb-0">{{ $mcu->hasil_narkoba ?? '-' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="info-card">
+                                    <div class="info-icon"><i class="fas fa-notes-medical"></i></div>
+                                    <div class="info-content">
+                                        <small class="text-muted d-block">Riwayat Penyakit</small>
+                                        <h6 class="mb-0">{{ $mcu->riwayat_penyakit ?? 'Tidak ada' }}</h6>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="detail-section">
-                            <div class="detail-header">
-                                <i class="fas fa-clipboard-check"></i>
-                                <h6 class="mb-0">Verifikasi Hasil MCU</h6>
-                            </div>
-                            <div class="detail-body">
-                                <form action="{{ route('admin.mcu.verifikasi', $mcu->id) }}" method="POST">
-                                    @csrf @method('PUT')
-                                    <div class="row g-3">
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">Status Verifikasi</label>
-                                            <select name="status" class="form-select" required>
-                                                <option value="">-- Pilih Status --</option>
-                                                <option value="lolos">Lolos MCU</option>
-                                                <option value="gagal">Gagal MCU</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label fw-semibold">Kondisi Kesehatan</label>
-                                            <select name="kondisi_kesehatan" class="form-select">
-                                                <option value="">-- Pilih Kondisi --</option>
-                                                <option value="Sangat Sehat">Sangat Sehat </option>
-                                                <option value="Sehat">Sehat </option>
-                                                <option value="Cukup">Cukup </option>
-                                                <option value="Kurang">Kurang </option>
-                                                <option value="Tidak Lulus">Tidak Memenuhi Syarat </option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">Catatan Admin</label>
-                                            <input type="text" name="catatan_admin" class="form-control"
-                                                placeholder="Catatan hasil verifikasi">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label fw-semibold">&nbsp;</label>
-                                            <button type="submit" class="btn btn-success w-100">
-                                                <i class="fas fa-check-circle me-1"></i> Verifikasi
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                        <div class="mt-3">
+                            <a href="{{ route('admin.mcu.input_hasil', $mcu->id) }}" class="btn btn-success">
+                                <i class="fas fa-stethoscope me-1"></i> Input Hasil MCU
+                            </a>
+                            <a href="{{ route('admin.mcu.surat_panggilan', $mcu->id) }}" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i> Unduh Surat Panggilan
+                            </a>
+                            @if ($mcu->kondisi_kesehatan)
+                                <a href="{{ route('admin.mcu.surat_hasil', $mcu->id) }}" class="btn btn-info">
+                                    <i class="fas fa-file-pdf me-1"></i> Unduh Hasil MCU
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -306,7 +291,7 @@
             padding: 12px 15px;
             background: #f8f9fa;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .info-card.full-width {
@@ -314,56 +299,35 @@
         }
 
         .info-icon {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             background: rgba(37, 99, 235, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #2563eb;
-            font-size: 1.2rem;
+            font-size: 1rem;
+            flex-shrink: 0;
         }
 
         .info-content {
             flex: 1;
         }
 
-        .detail-section {
-            margin-bottom: 25px;
+        .info-content small {
+            font-size: 0.7rem;
         }
 
-        .detail-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 2px solid #e9ecef;
-            margin-bottom: 15px;
-        }
-
-        .detail-header i {
-            color: #2563eb;
-            font-size: 1.1rem;
-        }
-
-        .detail-header h6 {
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .detail-body {
-            padding: 0 0 0 28px;
+        .info-content h6 {
+            font-size: 0.9rem;
+            margin-bottom: 0;
         }
 
         @media (max-width: 768px) {
             .info-card {
                 flex-direction: column;
                 text-align: center;
-            }
-
-            .detail-body {
-                padding-left: 0;
             }
         }
     </style>

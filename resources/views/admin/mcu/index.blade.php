@@ -59,9 +59,6 @@
                                     </option>
                                     <option value="tidak_hadir" {{ request('status') == 'tidak_hadir' ? 'selected' : '' }}>
                                         Tidak Hadir</option>
-                                    <option value="hasil_diupload"
-                                        {{ request('status') == 'hasil_diupload' ? 'selected' : '' }}>Hasil Diupload
-                                    </option>
                                     <option value="verifikasi" {{ request('status') == 'verifikasi' ? 'selected' : '' }}>
                                         Verifikasi</option>
                                     <option value="lolos" {{ request('status') == 'lolos' ? 'selected' : '' }}>Lolos
@@ -81,6 +78,7 @@
                                         <th>Jadwal MCU</th>
                                         <th>Lokasi</th>
                                         <th class="text-center">Status</th>
+                                        <th class="text-center">Skor</th>
                                         <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -95,11 +93,9 @@
                                                     </div>
                                                     <div>
                                                         <strong>{{ $item->pelamar->nama_lengkap ?? '-' }}</strong><br>
-
                                                     </div>
                                                 </div>
                                             </td>
-
                                             <td>
                                                 {{ Carbon\Carbon::parse($item->jadwal_mcu)->format('d F Y') }}<br>
                                                 <small
@@ -114,6 +110,19 @@
                                                     class="badge bg-{{ $item->status_badge }}">{{ $item->status_text }}</span>
                                             </td>
                                             <td class="text-center">
+                                                @if ($item->nilai_mcu)
+                                                    @php
+                                                        $skorTampil = $item->nilai_mcu;
+                                                        if ($skorTampil > 100) {
+                                                            $skorTampil = $skorTampil / 100;
+                                                        }
+                                                        echo number_format($skorTampil, 2, ',', '.');
+                                                    @endphp
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="{{ route('admin.mcu.show', $item->id) }}"
                                                         class="btn btn-outline-info" title="Detail"><i
@@ -121,9 +130,9 @@
                                                     <a href="{{ route('admin.mcu.edit', $item->id) }}"
                                                         class="btn btn-outline-warning" title="Edit"><i
                                                             class="fas fa-edit"></i></a>
-                                                    <a href="{{ route('admin.mcu.cetak-surat', $item->id) }}"
-                                                        class="btn btn-outline-success" title="Cetak Surat"
-                                                        target="_blank"><i class="fas fa-print"></i></a>
+                                                    <a href="{{ route('admin.mcu.surat_panggilan', $item->id) }}"
+                                                        class="btn btn-outline-success" title="Unduh Surat Panggilan"><i
+                                                            class="fas fa-download"></i></a>
                                                     <button type="button" class="btn btn-outline-danger" title="Hapus"
                                                         onclick="if(confirm('Yakin ingin menghapus jadwal MCU ini?')) document.getElementById('delete-{{ $item->id }}').submit();"><i
                                                             class="fas fa-trash"></i></button>

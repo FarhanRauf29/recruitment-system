@@ -15,15 +15,10 @@
                         </p>
                     </div>
                     <div class="card-body">
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show">
-                                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        @endif
                         @if (session('error'))
                             <div class="alert alert-danger alert-dismissible fade show">
-                                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {{ session('error') }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         @endif
@@ -64,6 +59,12 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        @if ($pelamarTahapans->isEmpty())
+                                            <div class="alert alert-warning mt-2">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Semua pelamar yang lolos ke tahap wawancara sudah memiliki jadwal wawancara.
+                                            </div>
+                                        @endif
                                         @error('pelamar_tahapan_id')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
@@ -190,8 +191,10 @@
 
                             <hr class="my-3">
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Simpan
-                                    Jadwal</button>
+                                <button type="submit" class="btn btn-primary"
+                                    {{ $pelamarTahapans->isEmpty() ? 'disabled' : '' }}>
+                                    <i class="fas fa-save me-1"></i> Simpan Jadwal
+                                </button>
                                 <a href="{{ route('admin.wawancara.index') }}" class="btn btn-secondary"><i
                                         class="fas fa-arrow-left me-1"></i> Kembali</a>
                             </div>

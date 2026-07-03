@@ -3,180 +3,110 @@
 @section('title', 'Jadwal Wawancara Saya')
 
 @section('content')
-    <div class="container py-4">
-        <div class="row">
+    <div class="container-fluid px-0">
+        <div class="row g-0">
             <div class="col-12">
-                <div class="card shadow-sm border-0 rounded-4">
-                    <div class="card-header bg-gradient-primary text-white border-0 rounded-top-4 py-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-circle bg-white bg-opacity-20 p-2">
-                                <i class="fas fa-chalkboard-user fa-lg"></i>
+                <div class="card border-0 shadow-sm rounded-0">
+                    <div class="card-header bg-primary text-white py-3 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-chalkboard-user fa-2x"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Jadwal Wawancara Saya</h5>
-                                <p class="small mb-0 opacity-75">Informasi jadwal wawancara Anda</p>
+                                <h5 class="mb-0 fw-bold">Jadwal Wawancara</h5>
+                                <small class="opacity-75">Informasi jadwal wawancara Anda</small>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-0">
                         @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show rounded-3">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle fa-lg me-2 text-success"></i>
-                                    <span>{{ session('success') }}</span>
-                                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-                                </div>
+                            <div class="alert alert-success alert-dismissible fade show border-0 rounded-0 m-3">
+                                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show border-0 rounded-0 m-3">
+                                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         @endif
 
-                        @forelse($wawancara as $item)
-                            @php
-                                $statusConfig = [
-                                    'dijadwalkan' => [
-                                        'color' => 'warning',
-                                        'icon' => 'calendar',
-                                        'text' => 'Dijadwalkan',
-                                    ],
-                                    'dikonfirmasi' => [
-                                        'color' => 'info',
-                                        'icon' => 'check-circle',
-                                        'text' => 'Dikonfirmasi',
-                                    ],
-                                    'hadir' => ['color' => 'primary', 'icon' => 'user-check', 'text' => 'Hadir'],
-                                    'tidak_hadir' => [
-                                        'color' => 'danger',
-                                        'icon' => 'user-times',
-                                        'text' => 'Tidak Hadir',
-                                    ],
-                                    'selesai' => [
-                                        'color' => 'secondary',
-                                        'icon' => 'flag-checkered',
-                                        'text' => 'Selesai',
-                                    ],
-                                    'verifikasi' => [
-                                        'color' => 'dark',
-                                        'icon' => 'clipboard-check',
-                                        'text' => 'Verifikasi',
-                                    ],
-                                    'lolos' => ['color' => 'success', 'icon' => 'check-circle', 'text' => 'Lolos'],
-                                    'gagal' => ['color' => 'danger', 'icon' => 'times-circle', 'text' => 'Gagal'],
-                                ];
-                                $config = $statusConfig[$item->status] ?? $statusConfig['dijadwalkan'];
-                            @endphp
-                            <div class="card mb-4 border-0 shadow-sm rounded-3 hover-card">
-                                <div class="card-body p-4">
-                                    <div class="row align-items-start">
-                                        <div class="col-lg-7 mb-3 mb-lg-0">
-                                            <div class="d-flex align-items-start gap-3">
-                                                <div class="rounded-circle p-3 flex-shrink-0"
-                                                    style="background: rgba(var(--bs-{{ $config['color'] }}-rgb), 0.1);">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4 py-3" style="min-width:200px;">Lowongan</th>
+                                        <th class="px-3 py-3" style="min-width:120px;">Tanggal</th>
+                                        <th class="px-3 py-3" style="min-width:100px;">Jam</th>
+                                        <th class="px-3 py-3" style="min-width:130px;">Metode</th>
+                                        <th class="px-3 py-3 text-center" style="min-width:120px;">Status</th>
+                                        <th class="px-4 py-3 text-center" style="min-width:140px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($wawancara as $item)
+                                        @php
+                                            $statusConfig = [
+                                                'dijadwalkan' => ['color' => 'warning', 'text' => 'Dijadwalkan'],
+                                                'dikonfirmasi' => ['color' => 'info', 'text' => 'Dikonfirmasi'],
+                                                'hadir' => ['color' => 'primary', 'text' => 'Hadir'],
+                                                'tidak_hadir' => ['color' => 'danger', 'text' => 'Tidak Hadir'],
+                                                'selesai' => ['color' => 'secondary', 'text' => 'Selesai'],
+                                                'verifikasi' => ['color' => 'dark', 'text' => 'Verifikasi'],
+                                                'lolos' => ['color' => 'success', 'text' => 'Lolos'],
+                                                'gagal' => ['color' => 'danger', 'text' => 'Tidak Lolos'],
+                                            ];
+                                            $config = $statusConfig[$item->status] ?? $statusConfig['dijadwalkan'];
+                                        @endphp
+                                        <tr class="align-middle">
+                                            <td class="px-4 py-3">
+                                                <span
+                                                    class="fw-semibold">{{ $item->lowongan->judul_lowongan ?? '-' }}</span>
+                                            </td>
+                                            <td class="px-3 py-3">
+                                                {{ Carbon\Carbon::parse($item->jadwal_wawancara)->format('d/m/Y') }}</td>
+                                            <td class="px-3 py-3">
+                                                {{ Carbon\Carbon::parse($item->jadwal_wawancara)->format('H:i') }}</td>
+                                            <td class="px-3 py-3">
+                                                <span
+                                                    class="badge bg-{{ $item->jenis_wawancara == 'online' ? 'success' : 'warning' }} rounded-pill px-3 py-1">
                                                     <i
-                                                        class="fas fa-{{ $config['icon'] }} fa-xl text-{{ $config['color'] }}"></i>
+                                                        class="fas fa-{{ $item->jenis_wawancara == 'online' ? 'video' : 'building' }} me-1"></i>
+                                                    {{ $item->jenis_wawancara == 'online' ? 'Online' : 'Offline' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-3 py-3 text-center">
+                                                <span
+                                                    class="badge bg-{{ $config['color'] }} rounded-pill px-3 py-1">{{ $config['text'] }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                    <a href="{{ route('pelamar.wawancara.show', $item->id) }}"
+                                                        class="btn btn-outline-primary btn-sm" title="Detail">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
                                                 </div>
-                                                <div>
-                                                    <h5 class="fw-bold mb-2">
-                                                        {{ $item->lowongan->judul_lowongan ?? 'Lowongan' }}</h5>
-                                                    <div class="d-flex flex-wrap gap-2 mb-2">
-                                                        <span
-                                                            class="badge bg-{{ $config['color'] }} rounded-pill px-3 py-1">
-                                                            <i class="fas fa-{{ $config['icon'] }} me-1"></i>
-                                                            {{ $config['text'] }}
-                                                        </span>
-                                                        <span
-                                                            class="badge bg-{{ $item->jenis_wawancara == 'online' ? 'success' : 'warning' }} rounded-pill px-3 py-1">
-                                                            <i
-                                                                class="fas fa-{{ $item->jenis_wawancara == 'online' ? 'video' : 'building' }} me-1"></i>
-                                                            {{ $item->jenis_wawancara == 'online' ? 'Online' : 'Offline' }}
-                                                        </span>
-                                                    </div>
-                                                    <div class="d-flex flex-wrap gap-3 mt-2">
-                                                        <div class="small text-muted">
-                                                            <i class="fas fa-calendar-alt me-1 text-primary"></i>
-                                                            {{ Carbon\Carbon::parse($item->jadwal_wawancara)->format('d F Y H:i') }}
-                                                            WIB
-                                                        </div>
-                                                        @if ($item->jenis_wawancara == 'offline')
-                                                            <div class="small text-muted">
-                                                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
-                                                                {{ \Str::limit($item->lokasi_wawancara, 40) }}
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
-                                                <a href="{{ route('pelamar.wawancara.show', $item->id) }}"
-                                                    class="btn btn-outline-primary rounded-pill px-4">
-                                                    <i class="fas fa-eye me-2"></i>Detail
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5">
+                                                <i
+                                                    class="fas fa-chalkboard-user fa-3x text-muted opacity-25 mb-3 d-block"></i>
+                                                <h6 class="text-muted fw-light">Belum Ada Jadwal Wawancara</h6>
+                                                <p class="text-muted small">Saat ini belum ada jadwal wawancara untuk Anda
+                                                </p>
+                                                <a href="{{ route('pelamar.dashboard') }}"
+                                                    class="btn btn-primary btn-sm rounded-pill px-4 mt-2">
+                                                    <i class="fas fa-home me-1"></i> Kembali ke Dashboard
                                                 </a>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <hr class="my-3">
-
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <div class="info-box">
-                                                <div class="info-icon bg-primary">
-                                                    <i class="fas fa-calendar-alt"></i>
-                                                </div>
-                                                <div class="info-content">
-                                                    <span class="info-label">Tanggal</span>
-                                                    <span
-                                                        class="info-value">{{ Carbon\Carbon::parse($item->jadwal_wawancara)->format('d F Y') }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="info-box">
-                                                <div class="info-icon bg-danger">
-                                                    <i class="fas fa-clock"></i>
-                                                </div>
-                                                <div class="info-content">
-                                                    <span class="info-label">Pukul</span>
-                                                    <span
-                                                        class="info-value">{{ Carbon\Carbon::parse($item->jadwal_wawancara)->format('H:i') }}
-                                                        WIB</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="info-box">
-                                                <div class="info-icon bg-info">
-                                                    <i class="fas fa-user-tie"></i>
-                                                </div>
-                                                <div class="info-content">
-                                                    <span class="info-label">Pewawancara</span>
-                                                    <span class="info-value">{{ $item->pewawancara ?? '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    @if ($item->keterangan)
-                                        <div class="mt-3 p-3 bg-light rounded-3">
-                                            <i class="fas fa-info-circle text-primary me-2"></i>
-                                            <span class="small">{{ $item->keterangan }}</span>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center py-5">
-                                <div class="empty-state">
-                                    <i class="fas fa-chalkboard-user fa-4x text-muted mb-3"></i>
-                                    <h5 class="text-muted">Belum Ada Jadwal Wawancara</h5>
-                                    <p class="text-muted">Belum ada jadwal wawancara untuk Anda.</p>
-                                    <a href="{{ route('pelamar.dashboard') }}"
-                                        class="btn btn-primary rounded-pill px-4 mt-2">
-                                        <i class="fas fa-home me-2"></i>Kembali ke Dashboard
-                                    </a>
-                                </div>
-                            </div>
-                        @endforelse
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -184,75 +114,32 @@
     </div>
 
     <style>
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-        }
-
-        .bg-opacity-20 {
-            --bs-bg-opacity: 0.2;
-        }
-
-        .hover-card {
-            transition: all 0.3s ease;
-        }
-
-        .hover-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 25px -8px rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .info-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .info-box:hover {
-            background: #e9ecef;
-            transform: translateX(3px);
-        }
-
-        .info-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .info-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .info-label {
-            font-size: 11px;
-            color: #6c757d;
-            letter-spacing: 0.3px;
-        }
-
-        .info-value {
-            font-size: 13px;
+        .table th {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        .empty-state {
-            padding: 40px 20px;
+        .table td {
+            font-size: 0.85rem;
+            vertical-align: middle;
         }
 
-        .rounded-4 {
-            border-radius: 1rem !important;
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
-        .rounded-3 {
-            border-radius: 0.75rem !important;
+        .btn-sm {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            font-weight: 500;
+            font-size: 0.7rem;
         }
     </style>
 @endsection

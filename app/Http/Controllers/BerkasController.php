@@ -31,6 +31,24 @@ class BerkasController extends Controller
         'dokumen_lain_file'
     ];
 
+    private $requiredFields = [
+        'cv_file',
+        'surat_lamaran_file',
+        'ijazah_file',
+        'transkrip_nilai_file',
+        'ktp_file',
+        'pas_foto_file',
+        'skck_file',
+        'surat_keterangan_sehat_file'
+    ];
+
+    private $optionalFields = [
+        'sertifikat_file',
+        'portofolio_file',
+        'kartu_keluarga_file',
+        'dokumen_lain_file'
+    ];
+
     public function index()
     {
         $user = Auth::user();
@@ -149,7 +167,10 @@ class BerkasController extends Controller
             return redirect()->back()->with('error', 'Anda hanya dapat mengupload berkas pada tahap Screening Berkas.');
         }
 
-        $request->validate($this->fileValidationRules());
+        $rules = $this->fileValidationRules();
+        $rules['pelamar_tahapan_id'] = 'required|exists:pelamar_tahapan,id';
+
+        $request->validate($rules);
 
         $data = [
             'pelamar_id' => $pelamar->id,
@@ -157,10 +178,31 @@ class BerkasController extends Controller
             'status_verifikasi' => 'Pending',
         ];
 
+        $uploadedFields = [];
         foreach ($this->fileFields as $field) {
             if ($request->hasFile($field)) {
                 $data[$field] = $request->file($field)->store("berkas/pelamar_{$pelamar->id}/lowongan_{$pelamarTahapan->lowongan_id}", 'public');
+                $uploadedFields[] = $field;
             }
+        }
+
+        $missingRequired = array_diff($this->requiredFields, $uploadedFields);
+        if (!empty($missingRequired)) {
+            $missingNames = [];
+            $fieldLabels = [
+                'cv_file' => 'CV',
+                'surat_lamaran_file' => 'Surat Lamaran',
+                'ijazah_file' => 'Ijazah',
+                'transkrip_nilai_file' => 'Transkrip Nilai',
+                'ktp_file' => 'KTP',
+                'pas_foto_file' => 'Pas Foto',
+                'skck_file' => 'SKCK',
+                'surat_keterangan_sehat_file' => 'Surat Keterangan Sehat'
+            ];
+            foreach ($missingRequired as $field) {
+                $missingNames[] = $fieldLabels[$field] ?? $field;
+            }
+            return redirect()->back()->with('error', 'Harap upload semua berkas wajib: ' . implode(', ', $missingNames));
         }
 
         Berkas::create($data);
@@ -239,13 +281,43 @@ class BerkasController extends Controller
         $request->validate($this->fileValidationRules());
 
         $data = [];
+        $uploadedFields = [];
         foreach ($this->fileFields as $field) {
             if ($request->hasFile($field)) {
                 if ($berkas->$field) {
                     Storage::disk('public')->delete($berkas->$field);
                 }
                 $data[$field] = $request->file($field)->store("berkas/pelamar_{$pelamar->id}/lowongan_{$berkas->pelamarTahapan->lowongan_id}", 'public');
+                $uploadedFields[] = $field;
             }
+        }
+
+        $existingFields = [];
+        foreach ($this->requiredFields as $field) {
+            if ($berkas->$field) {
+                $existingFields[] = $field;
+            }
+        }
+
+        $allFields = array_merge($existingFields, $uploadedFields);
+        $missingRequired = array_diff($this->requiredFields, $allFields);
+
+        if (!empty($missingRequired)) {
+            $missingNames = [];
+            $fieldLabels = [
+                'cv_file' => 'CV',
+                'surat_lamaran_file' => 'Surat Lamaran',
+                'ijazah_file' => 'Ijazah',
+                'transkrip_nilai_file' => 'Transkrip Nilai',
+                'ktp_file' => 'KTP',
+                'pas_foto_file' => 'Pas Foto',
+                'skck_file' => 'SKCK',
+                'surat_keterangan_sehat_file' => 'Surat Keterangan Sehat'
+            ];
+            foreach ($missingRequired as $field) {
+                $missingNames[] = $fieldLabels[$field] ?? $field;
+            }
+            return redirect()->back()->with('error', 'Harap upload semua berkas wajib: ' . implode(', ', $missingNames));
         }
 
         if (count($data) > 0) {
@@ -278,6 +350,10 @@ class BerkasController extends Controller
 
             if ($pelamarTahapan) {
                 $now = Carbon::now('Asia/Jakarta');
+                $pelamarId = $berkas->pelamar_id;
+                $lowonganId = $pelamarTahapan->lowongan_id;
+                $currentTahapanId = $pelamarTahapan->tahapan_id;
+                $currentUrutan = $pelamarTahapan->tahapan->urutan;
 
                 if ($newStatus === 'Diterima' && $oldStatus !== 'Diterima') {
                     $pelamarTahapan->status = 'lolos';
@@ -285,31 +361,104 @@ class BerkasController extends Controller
                     $pelamarTahapan->catatan = 'Berkas lengkap dan sesuai, dinyatakan lolos ke tahap selanjutnya.';
                     $pelamarTahapan->save();
 
-                    $nextTahapans = TahapanRekrutmen::where('urutan', '>', $pelamarTahapan->tahapan->urutan)
-                        ->orderBy('urutan')
-                        ->get();
+                    $allTahapans = TahapanRekrutmen::orderBy('urutan')->get();
+                    $nextTahapanFound = false;
 
-                    foreach ($nextTahapans as $tahapan) {
-                        $nextPelamarTahapan = PelamarTahapan::firstOrCreate([
-                            'pelamar_id' => $berkas->pelamar_id,
-                            'lowongan_id' => $pelamarTahapan->lowongan_id,
-                            'tahapan_id' => $tahapan->id,
-                        ], [
-                            'status' => 'diproses',
-                            'tanggal_mulai' => $now,
-                        ]);
+                    foreach ($allTahapans as $tahap) {
+                        if ($tahap->urutan <= $currentUrutan) {
+                            continue;
+                        }
 
-                        if ($nextPelamarTahapan->wasRecentlyCreated) {
-                            $nextPelamarTahapan->status = 'diproses';
-                            $nextPelamarTahapan->tanggal_mulai = $now;
-                            $nextPelamarTahapan->save();
+                        $existingNext = PelamarTahapan::where('pelamar_id', $pelamarId)
+                            ->where('lowongan_id', $lowonganId)
+                            ->where('tahapan_id', $tahap->id)
+                            ->first();
+
+                        if ($existingNext) {
+                            if ($nextTahapanFound === false) {
+                                if ($existingNext->status === 'menunggu' || $existingNext->status === 'belum_dimulai' || $existingNext->status === 'terkunci') {
+                                    $existingNext->status = 'diproses';
+                                    $existingNext->tanggal_mulai = $now;
+                                    $existingNext->catatan = 'Tahapan ini terbuka setelah lolos tahap sebelumnya.';
+                                    $existingNext->save();
+                                    $nextTahapanFound = true;
+                                }
+                            } else {
+                                if ($existingNext->status === 'diproses') {
+                                    $existingNext->status = 'menunggu';
+                                    $existingNext->tanggal_mulai = null;
+                                    $existingNext->catatan = 'Menunggu giliran tahapan ini.';
+                                    $existingNext->save();
+                                }
+                            }
+                        } else {
+                            if ($nextTahapanFound === false) {
+                                PelamarTahapan::create([
+                                    'pelamar_id' => $pelamarId,
+                                    'lowongan_id' => $lowonganId,
+                                    'tahapan_id' => $tahap->id,
+                                    'status' => 'diproses',
+                                    'tanggal_mulai' => $now,
+                                    'catatan' => 'Tahapan ini terbuka setelah lolos tahap sebelumnya.',
+                                ]);
+                                $nextTahapanFound = true;
+                            } else {
+                                PelamarTahapan::create([
+                                    'pelamar_id' => $pelamarId,
+                                    'lowongan_id' => $lowonganId,
+                                    'tahapan_id' => $tahap->id,
+                                    'status' => 'menunggu',
+                                    'tanggal_mulai' => null,
+                                    'catatan' => 'Menunggu giliran tahapan ini.',
+                                ]);
+                            }
                         }
                     }
+
+                    PelamarTahapan::where('pelamar_id', $pelamarId)
+                        ->where('lowongan_id', $lowonganId)
+                        ->where('tahapan_id', '!=', $currentTahapanId)
+                        ->where('status', 'menunggu')
+                        ->where('status', '!=', 'diproses')
+                        ->update(['status' => 'menunggu']);
                 } elseif ($newStatus === 'Ditolak' && $oldStatus !== 'Ditolak') {
                     $pelamarTahapan->status = 'gagal';
                     $pelamarTahapan->tanggal_selesai = $now;
                     $pelamarTahapan->catatan = $request->catatan_admin ?: 'Berkas tidak memenuhi persyaratan yang ditentukan.';
                     $pelamarTahapan->save();
+
+                    PelamarTahapan::where('pelamar_id', $pelamarId)
+                        ->where('lowongan_id', $lowonganId)
+                        ->where('status', 'menunggu')
+                        ->orWhere('status', 'diproses')
+                        ->orWhere('status', 'belum_dimulai')
+                        ->update(['status' => 'terkunci']);
+                } elseif ($newStatus === 'Pending') {
+                    if ($oldStatus === 'Diterima') {
+                        $pelamarTahapan->status = 'diproses';
+                        $pelamarTahapan->tanggal_mulai = $now;
+                        $pelamarTahapan->tanggal_selesai = null;
+                        $pelamarTahapan->catatan = 'Menunggu verifikasi ulang berkas.';
+                        $pelamarTahapan->save();
+
+                        PelamarTahapan::where('pelamar_id', $pelamarId)
+                            ->where('lowongan_id', $lowonganId)
+                            ->where('status', 'diproses')
+                            ->where('tahapan_id', '!=', $currentTahapanId)
+                            ->update(['status' => 'menunggu']);
+                    } else {
+                        $pelamarTahapan->status = 'menunggu';
+                        $pelamarTahapan->tanggal_mulai = $now;
+                        $pelamarTahapan->tanggal_selesai = null;
+                        $pelamarTahapan->catatan = 'Menunggu verifikasi berkas.';
+                        $pelamarTahapan->save();
+
+                        PelamarTahapan::where('pelamar_id', $pelamarId)
+                            ->where('lowongan_id', $lowonganId)
+                            ->where('status', 'diproses')
+                            ->where('tahapan_id', '!=', $currentTahapanId)
+                            ->update(['status' => 'menunggu']);
+                    }
                 }
             }
 
