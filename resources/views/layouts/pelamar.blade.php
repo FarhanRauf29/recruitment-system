@@ -734,12 +734,12 @@
                             <i class="fas fa-list-check"></i> Tahapan
                         </a>
                     </li>
-                    <li>
+                    {{-- <li>
                         <a class="nav-link {{ request()->routeIs('pelamar.spk.hasil') ? 'active' : '' }}"
                             href="{{ route('pelamar.spk.hasil') }}">
                             <i class="fas fa-chart-pie"></i> Hasil SPK
                         </a>
-                    </li>
+                    </li> --}}
                     <li>
                         <a class="nav-link {{ request()->routeIs('pelamar.offering.*') ? 'active' : '' }}"
                             href="{{ route('pelamar.offering.index') }}">

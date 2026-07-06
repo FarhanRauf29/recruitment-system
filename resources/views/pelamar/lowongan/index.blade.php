@@ -38,7 +38,8 @@
                                 $isRegistered =
                                     Auth::user()->pelamar &&
                                     Auth::user()->pelamar->isRegisteredForLowongan($lowongan->id);
-                                $slotTersedia = $lowongan->slot - $lowongan->pelamars()->count();
+                                $slotTerisi = $lowongan->getJumlahTerisiAttribute();
+                                $slotTersedia = $lowongan->slot - $slotTerisi;
                                 $statusBadge = $lowongan->status == 'buka' ? 'success' : 'secondary';
                                 $statusIcon = $lowongan->status == 'buka' ? 'check-circle' : 'lock';
                             @endphp

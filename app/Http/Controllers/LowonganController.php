@@ -75,6 +75,8 @@ class LowonganController extends Controller
 
         $lowongan->update($request->all());
 
+        $lowongan->updateStatusIfNeeded();
+
         return redirect()->route('admin.lowongan.index')->with('success', 'Lowongan berhasil diperbarui.');
     }
 
@@ -117,11 +119,9 @@ class LowonganController extends Controller
             return redirect()->back()->with('error', 'Lowongan tidak tersedia untuk pendaftaran.');
         }
 
-        if (!$lowongan->isSlotAvailable()) {
-            return redirect()->back()->with('error', 'Slot lowongan sudah penuh.');
-        }
-
         try {
+            DB::beginTransaction();
+
             $pelamar->lowongans()->attach($lowongan->id, [
                 'status' => 'pending',
                 'created_at' => now(),
@@ -137,16 +137,12 @@ class LowonganController extends Controller
                 Log::error("❌ Gagal createTahapanForPelamar: " . $e->getMessage());
             }
 
-            try {
-                $lowongan->updateStatusIfNeeded();
-                Log::info("✅ Status lowongan berhasil diperbarui");
-            } catch (\Exception $e) {
-                Log::error("❌ Gagal updateStatusIfNeeded: " . $e->getMessage());
-            }
+            DB::commit();
 
             return redirect()->route('pelamar.lowongan.index')
                 ->with('success', 'Berhasil mendaftar di lowongan ini. Silakan cek tahapan rekrutmen Anda.');
         } catch (\Exception $e) {
+            DB::rollback();
             Log::error('❌ Fatal error apply: ' . $e->getMessage());
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
                 return redirect()->route('pelamar.lowongan.index')
@@ -309,6 +305,8 @@ class LowonganController extends Controller
                     $nextPelamarTahapan->save();
                 }
             }
+
+            $lowongan->updateStatusIfNeeded();
 
             DB::commit();
 

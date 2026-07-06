@@ -410,6 +410,12 @@ class SpkRecruitmentController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
+        $lowongan = Lowongan::find($lowonganId);
+
+        if (!$lowongan->isSlotAvailable()) {
+            return redirect()->back()->with('error', 'Slot lowongan sudah penuh. Tidak dapat approve kandidat baru.');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -442,17 +448,20 @@ class SpkRecruitmentController extends Controller
             $pelamarTahapan->approved_by = Auth::id();
             $pelamarTahapan->save();
 
+            $lowongan->updateStatusIfNeeded();
+
             DB::commit();
 
             Log::info('Approve berhasil', [
                 'pelamar_id' => $pelamarId,
                 'lowongan_id' => $lowonganId,
                 'status' => $pelamarTahapan->spk_status,
-                'nilai' => $nilaiAkhir
+                'nilai' => $nilaiAkhir,
+                'slot_terisi' => $lowongan->getJumlahTerisiAttribute()
             ]);
 
             return redirect()->route('admin.offering.index', $lowonganId)
-                ->with('success', 'Kandidat berhasil di-approve. Silakan buat penawaran kerja.');
+                ->with('success', 'Kandidat berhasil di-approve. Slot terisi: ' . $lowongan->getJumlahTerisiAttribute() . ' / ' . $lowongan->slot);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Approve error: ' . $e->getMessage());
@@ -487,6 +496,7 @@ class SpkRecruitmentController extends Controller
     {
         try {
             $lowongan = Lowongan::findOrFail($lowonganId);
+            $slot = $lowongan->slot;
 
             if ($metode == 'saw') {
                 $data = HasilSAW::with(['pelamar'])->where('lowongan_id', $lowonganId)->orderBy('ranking', 'asc')->get();
@@ -504,12 +514,12 @@ class SpkRecruitmentController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Hasil Ranking ' . strtoupper($metode));
 
-            $sheet->getStyle('A1:F1')->getFont()->setBold(true);
-            $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-            $sheet->getStyle('A1:F1')->getFill()->getStartColor()->setARGB('FF0D6EFD');
-            $sheet->getStyle('A1:F1')->getFont()->getColor()->setARGB('FFFFFFFF');
+            $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+            $sheet->getStyle('A1:G1')->getFill()->getStartColor()->setARGB('FF0D6EFD');
+            $sheet->getStyle('A1:G1')->getFont()->getColor()->setARGB('FFFFFFFF');
 
-            $sheet->mergeCells('A1:F1');
+            $sheet->mergeCells('A1:G1');
             $sheet->setCellValue('A1', 'LAPORAN HASIL RANKING KANDIDAT');
             $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('A1')->getFont()->setSize(14);
@@ -518,6 +528,10 @@ class SpkRecruitmentController extends Controller
             $row = 2;
             $sheet->setCellValue('A' . $row, 'Lowongan');
             $sheet->setCellValue('B' . $row, ': ' . $lowongan->judul_lowongan);
+            $row++;
+
+            $sheet->setCellValue('A' . $row, 'Slot Lowongan');
+            $sheet->setCellValue('B' . $row, ': ' . $slot . ' orang');
             $row++;
 
             $sheet->setCellValue('A' . $row, 'Metode Perhitungan');
@@ -544,8 +558,9 @@ class SpkRecruitmentController extends Controller
             $sheet->setCellValue('D' . $row, 'Email');
             $sheet->setCellValue('E' . $row, $kolomNilai);
             $sheet->setCellValue('F' . $row, 'Status Rekomendasi');
+            $sheet->setCellValue('G' . $row, 'Keterangan');
 
-            $headerRange = 'A' . $row . ':F' . $row;
+            $headerRange = 'A' . $row . ':G' . $row;
             $sheet->getStyle($headerRange)->getFont()->setBold(true);
             $sheet->getStyle($headerRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
             $sheet->getStyle($headerRange)->getFill()->getStartColor()->setARGB('FFE9ECEF');
@@ -559,6 +574,9 @@ class SpkRecruitmentController extends Controller
                 $nilai = $metode == 'saw' ? $item->nilai_saw : $item->nilai_topsis;
                 $status = $item->status_rekomendasi == 'rekomendasi' ? 'REKOMENDASI' : 'TIDAK REKOMENDASI';
                 $statusColor = $item->status_rekomendasi == 'rekomendasi' ? 'FF10B981' : 'FFEF4444';
+                $keterangan = $item->status_rekomendasi == 'rekomendasi'
+                    ? 'Direkomendasikan untuk tahap selanjutnya'
+                    : 'Tidak direkomendasikan untuk tahap selanjutnya';
 
                 $sheet->setCellValue('A' . $rowNum, $index + 1);
                 $sheet->setCellValue('B' . $rowNum, $item->ranking);
@@ -566,20 +584,16 @@ class SpkRecruitmentController extends Controller
                 $sheet->setCellValue('D' . $rowNum, $item->pelamar->email);
                 $sheet->setCellValue('E' . $rowNum, $nilai);
                 $sheet->setCellValue('F' . $rowNum, $status);
+                $sheet->setCellValue('G' . $rowNum, $keterangan);
 
                 $sheet->getStyle('E' . $rowNum)->getNumberFormat()->setFormatCode('0.0000');
                 $sheet->getStyle('A' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('B' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('E' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-                if ($item->ranking <= 3) {
+                if ($item->ranking <= $slot) {
                     $sheet->getStyle('B' . $rowNum)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
                     $sheet->getStyle('B' . $rowNum)->getFill()->getStartColor()->setARGB('FF10B981');
-                    $sheet->getStyle('B' . $rowNum)->getFont()->getColor()->setARGB('FFFFFFFF');
-                    $sheet->getStyle('B' . $rowNum)->getFont()->setBold(true);
-                } elseif ($item->ranking <= 5) {
-                    $sheet->getStyle('B' . $rowNum)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-                    $sheet->getStyle('B' . $rowNum)->getFill()->getStartColor()->setARGB('FFF59E0B');
                     $sheet->getStyle('B' . $rowNum)->getFont()->getColor()->setARGB('FFFFFFFF');
                     $sheet->getStyle('B' . $rowNum)->getFont()->setBold(true);
                 }
@@ -593,11 +607,11 @@ class SpkRecruitmentController extends Controller
                 $rowNum++;
             }
 
-            foreach (range('A', 'F') as $columnID) {
+            foreach (range('A', 'G') as $columnID) {
                 $sheet->getColumnDimension($columnID)->setAutoSize(true);
             }
 
-            $borderRange = 'A' . $startRow . ':F' . ($rowNum - 1);
+            $borderRange = 'A' . $startRow . ':G' . ($rowNum - 1);
             $styleArray = [
                 'borders' => [
                     'allBorders' => [
@@ -614,7 +628,7 @@ class SpkRecruitmentController extends Controller
             $sheet->getStyle('A' . $footerRow)->getFont()->setItalic(true);
 
             $sheet->setCellValue('E' . $footerRow, 'Tanda Tangan: ___________________');
-            $sheet->mergeCells('E' . $footerRow . ':F' . $footerRow);
+            $sheet->mergeCells('E' . $footerRow . ':G' . $footerRow);
             $sheet->getStyle('E' . $footerRow)->getFont()->setItalic(true);
 
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -632,6 +646,7 @@ class SpkRecruitmentController extends Controller
             return redirect()->back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
         }
     }
+
     public function exportPenilaian($lowonganId)
     {
         $lowongan = Lowongan::findOrFail($lowonganId);
@@ -658,24 +673,27 @@ class SpkRecruitmentController extends Controller
 
         $sheet->setTitle('Penilaian Kandidat');
 
-        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-        $sheet->getStyle('A1:G1')->getFill()->getStartColor()->setARGB('FF0D6EFD');
-        $sheet->getStyle('A1:G1')->getFont()->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:H1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+        $sheet->getStyle('A1:H1')->getFill()->getStartColor()->setARGB('FF0D6EFD');
+        $sheet->getStyle('A1:H1')->getFont()->getColor()->setARGB('FFFFFFFF');
 
         $sheet->setCellValue('A1', 'LAPORAN PENILAIAN KANDIDAT SPK');
-        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A1:H1');
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('A1')->getFont()->setSize(14);
 
         $sheet->setCellValue('A2', 'Lowongan');
         $sheet->setCellValue('B2', ': ' . $lowongan->judul_lowongan);
         $sheet->mergeCells('A2:B2');
-        $sheet->setCellValue('A3', 'Tanggal Cetak');
-        $sheet->setCellValue('B3', ': ' . now()->translatedFormat('d F Y H:i:s'));
+        $sheet->setCellValue('A3', 'Slot Lowongan');
+        $sheet->setCellValue('B3', ': ' . $lowongan->slot . ' orang');
         $sheet->mergeCells('A3:B3');
+        $sheet->setCellValue('A4', 'Tanggal Cetak');
+        $sheet->setCellValue('B4', ': ' . now()->translatedFormat('d F Y H:i:s'));
+        $sheet->mergeCells('A4:B4');
 
-        $row = 5;
+        $row = 6;
         $col = 'A';
         $sheet->setCellValue($col++ . $row, 'No');
         $sheet->setCellValue($col++ . $row, 'Nama Pelamar');
@@ -690,14 +708,14 @@ class SpkRecruitmentController extends Controller
         $sheet->setCellValue($col++ . $row, 'Total Nilai');
         $sheet->setCellValue($col++ . $row, 'Keterangan');
 
-        $headerRange = 'A5:' . $sheet->getHighestColumn() . '5';
+        $headerRange = 'A6:' . $sheet->getHighestColumn() . '6';
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
         $sheet->getStyle($headerRange)->getFill()->getStartColor()->setARGB('FFE9ECEF');
         $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle($headerRange)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-        $rowNum = 6;
+        $rowNum = 7;
         foreach ($pelamars as $index => $pelamar) {
             $col = 'A';
             $sheet->setCellValue($col++ . $rowNum, $index + 1);
@@ -724,7 +742,7 @@ class SpkRecruitmentController extends Controller
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
-        $borderRange = 'A5:' . $sheet->getHighestColumn() . ($rowNum - 1);
+        $borderRange = 'A6:' . $sheet->getHighestColumn() . ($rowNum - 1);
         $styleArray = [
             'borders' => [
                 'allBorders' => [

@@ -71,10 +71,13 @@
                                             <td class="text-center">
                                                 {{ \Carbon\Carbon::parse($lowongan->tanggal_tutup)->format('d F Y') }}</td>
                                             <td class="text-center">
-                                                {{ $lowongan->pelamars()->count() }}/{{ $lowongan->slot }}
+                                                {{ $lowongan->getJumlahTerisiAttribute() }}/{{ $lowongan->slot }}
                                             </td>
-                                            <td class="text-center"><span
-                                                    class="badge {{ $lowongan->status == 'buka' ? 'bg-success' : 'bg-danger' }}">{{ ucfirst($lowongan->status) }}</span>
+                                            <td class="text-center">
+                                                <span
+                                                    class="badge {{ $lowongan->status == 'buka' ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ ucfirst($lowongan->status) }}
+                                                </span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group btn-group-sm">
@@ -122,10 +125,4 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-        <script>
-            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-        </script>
-    @endpush
 @endsection

@@ -49,15 +49,33 @@ class Lowongan extends Model
         return $this->hasMany(PelamarTahapan::class, 'lowongan_id');
     }
 
+    public function getJumlahTerisiAttribute()
+    {
+        return $this->pelamarTahapans()
+            ->whereIn('spk_status', ['approved', 'hired', 'hired_completed', 'onboarding_completed'])
+            ->orWhere(function ($q) {
+                $q->whereNull('spk_status')
+                    ->where('status', 'lolos');
+            })
+            ->count();
+    }
+
+    public function getSlotTersediaAttribute()
+    {
+        return $this->slot - $this->getJumlahTerisiAttribute();
+    }
+
     public function isSlotAvailable()
     {
-        return $this->pelamars()->count() < $this->slot;
+        return $this->getJumlahTerisiAttribute() < $this->slot;
     }
 
     public function updateStatusIfNeeded()
     {
         if ($this->status === 'buka' && !$this->isSlotAvailable()) {
             $this->update(['status' => 'tutup']);
+        } elseif ($this->status === 'tutup' && $this->isSlotAvailable()) {
+            $this->update(['status' => 'buka']);
         }
     }
 

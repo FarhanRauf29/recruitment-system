@@ -36,7 +36,6 @@
                             </div>
                         @endif
 
-                        <!-- Tabel Informasi Utama -->
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover mb-0" style="font-size:0.9rem;">
                                 <tbody>
@@ -90,7 +89,7 @@
                             </table>
                         </div>
 
-                        <!-- Informasi Detail Berdasarkan Jenis Wawancara -->
+
                         @if ($wawancara->jenis_wawancara == 'online')
                             <div class="mt-3">
                                 <div class="card border-0 bg-light bg-opacity-50 rounded-3">
@@ -143,7 +142,6 @@
                             </div>
                         @endif
 
-                        <!-- Keterangan & Catatan -->
                         @if ($wawancara->keterangan)
                             <div class="mt-3">
                                 <div class="card border-0 bg-light bg-opacity-50 rounded-3">
