@@ -37,16 +37,16 @@ class BerkasController extends Controller
         'ijazah_file',
         'transkrip_nilai_file',
         'ktp_file',
-        'pas_foto_file',
-        'skck_file',
-        'surat_keterangan_sehat_file'
+        'pas_foto_file'
     ];
 
     private $optionalFields = [
         'sertifikat_file',
         'portofolio_file',
         'kartu_keluarga_file',
-        'dokumen_lain_file'
+        'dokumen_lain_file',
+        'skck_file',
+        'surat_keterangan_sehat_file'
     ];
 
     public function index()
@@ -195,9 +195,7 @@ class BerkasController extends Controller
                 'ijazah_file' => 'Ijazah',
                 'transkrip_nilai_file' => 'Transkrip Nilai',
                 'ktp_file' => 'KTP',
-                'pas_foto_file' => 'Pas Foto',
-                'skck_file' => 'SKCK',
-                'surat_keterangan_sehat_file' => 'Surat Keterangan Sehat'
+                'pas_foto_file' => 'Pas Foto'
             ];
             foreach ($missingRequired as $field) {
                 $missingNames[] = $fieldLabels[$field] ?? $field;
@@ -310,9 +308,7 @@ class BerkasController extends Controller
                 'ijazah_file' => 'Ijazah',
                 'transkrip_nilai_file' => 'Transkrip Nilai',
                 'ktp_file' => 'KTP',
-                'pas_foto_file' => 'Pas Foto',
-                'skck_file' => 'SKCK',
-                'surat_keterangan_sehat_file' => 'Surat Keterangan Sehat'
+                'pas_foto_file' => 'Pas Foto'
             ];
             foreach ($missingRequired as $field) {
                 $missingNames[] = $fieldLabels[$field] ?? $field;
@@ -460,6 +456,8 @@ class BerkasController extends Controller
                             ->update(['status' => 'menunggu']);
                     }
                 }
+
+                $this->sinkronNilaiScreening($berkas);
             }
 
             DB::commit();
@@ -473,6 +471,291 @@ class BerkasController extends Controller
             Log::error('Error updating berkas status: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
         }
+    }
+
+    private function hitungKelengkapanBerkas($berkas)
+    {
+        $totalDokumen = count($this->requiredFields) + count($this->optionalFields);
+        $dokumenTerisi = 0;
+
+        foreach ($this->requiredFields as $field) {
+            if (!empty($berkas->$field)) {
+                $dokumenTerisi++;
+            }
+        }
+
+        foreach ($this->optionalFields as $field) {
+            if (!empty($berkas->$field)) {
+                $dokumenTerisi++;
+            }
+        }
+
+        $persentase = ($dokumenTerisi / $totalDokumen) * 100;
+        return round(min(100, $persentase), 2);
+    }
+
+    private function sinkronNilaiScreening($berkas)
+    {
+        try {
+            $pelamar = Pelamar::find($berkas->pelamar_id);
+            if (!$pelamar) {
+                return;
+            }
+
+            $pendidikan = \App\Models\RiwayatPendidikan::where('pelamar_id', $pelamar->id)->get();
+            $pengalaman = \App\Models\RiwayatPengalaman::where('pelamar_id', $pelamar->id)->get();
+            $magang = \App\Models\RiwayatMagang::where('pelamar_id', $pelamar->id)->get();
+            $organisasi = \App\Models\RiwayatOrganisasi::where('pelamar_id', $pelamar->id)->get();
+            $bahasa = \App\Models\RiwayatBahasa::where('pelamar_id', $pelamar->id)->get();
+            $keahlian = \App\Models\RiwayatKeahlian::where('pelamar_id', $pelamar->id)->get();
+
+            $nilaiKelengkapanBerkas = $this->hitungKelengkapanBerkas($berkas);
+
+            $nilaiPendidikan = $this->nilaiPendidikan($pendidikan);
+            $nilaiPengalaman = $this->nilaiPengalaman($pengalaman);
+            $nilaiMagang = $this->nilaiMagang($magang);
+            $nilaiOrganisasi = $this->nilaiOrganisasi($organisasi);
+            $nilaiBahasa = $this->nilaiBahasa($bahasa);
+            $nilaiKeahlian = $this->nilaiKeahlian($keahlian);
+
+            $nilaiAkhir = ($nilaiKelengkapanBerkas * 0.20) +
+                ($nilaiPendidikan * 0.25) +
+                ($nilaiPengalaman * 0.20) +
+                ($nilaiOrganisasi * 0.10) +
+                ($nilaiMagang * 0.10) +
+                ($nilaiBahasa * 0.075) +
+                ($nilaiKeahlian * 0.075);
+
+            $nilaiAkhir = round($nilaiAkhir, 2);
+
+            $kriteriaScreening = \App\Models\Kriteria::where('nama_kriteria', 'like', '%screening%')
+                ->orWhere('nama_kriteria', 'like', '%berkas%')
+                ->orWhere('kode_kriteria', 'C1')
+                ->first();
+
+            if ($kriteriaScreening) {
+                $lowonganId = $berkas->pelamarTahapan->lowongan_id ?? null;
+
+                if ($lowonganId) {
+                    \App\Models\PenilaianKandidat::updateOrCreate(
+                        [
+                            'pelamar_id' => $pelamar->id,
+                            'lowongan_id' => $lowonganId,
+                            'kriteria_id' => $kriteriaScreening->id,
+                        ],
+                        [
+                            'nilai' => $nilaiAkhir,
+                            'catatan' => 'Nilai otomatis dari screening berkas. Kelengkapan: ' . $nilaiKelengkapanBerkas . '%, Pendidikan: ' . $nilaiPendidikan . ', Pengalaman: ' . $nilaiPengalaman,
+                        ]
+                    );
+
+                    Log::info('Nilai screening disimpan', [
+                        'pelamar_id' => $pelamar->id,
+                        'lowongan_id' => $lowonganId,
+                        'nilai_akhir' => $nilaiAkhir,
+                        'detail' => [
+                            'kelengkapan_berkas' => $nilaiKelengkapanBerkas,
+                            'pendidikan' => $nilaiPendidikan,
+                            'pengalaman' => $nilaiPengalaman,
+                            'organisasi' => $nilaiOrganisasi,
+                            'magang' => $nilaiMagang,
+                            'bahasa' => $nilaiBahasa,
+                            'keahlian' => $nilaiKeahlian,
+                        ]
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error sinkron nilai screening: ' . $e->getMessage());
+        }
+    }
+
+    private function nilaiPendidikan($pendidikan)
+    {
+        $tingkatNilai = [
+            'SD' => 40,
+            'SMP' => 50,
+            'SMA/SMK' => 60,
+            'D3' => 75,
+            'D4' => 80,
+            'S1' => 85,
+            'S2' => 95,
+            'S3' => 100,
+        ];
+
+        if ($pendidikan->isEmpty()) {
+            return 0;
+        }
+
+        $tertinggi = $pendidikan->sortByDesc(function ($item) use ($tingkatNilai) {
+            return $tingkatNilai[$item->tingkat] ?? 0;
+        })->first();
+
+        $nilai = $tingkatNilai[$tertinggi->tingkat] ?? 60;
+
+        if ($tertinggi->nilai && is_numeric($tertinggi->nilai)) {
+            $ipk = (float)$tertinggi->nilai;
+            if ($ipk >= 3.51) {
+                $nilai = min(100, $nilai + 10);
+            } elseif ($ipk >= 3.00) {
+                $nilai = min(100, $nilai + 5);
+            } elseif ($ipk >= 2.50) {
+                $nilai = $nilai;
+            } else {
+                $nilai = max(0, $nilai - 5);
+            }
+        }
+
+        return min(100, $nilai);
+    }
+
+    private function nilaiPengalaman($pengalaman)
+    {
+        if ($pengalaman->isEmpty()) {
+            return 40;
+        }
+
+        $totalBulan = 0;
+        $posisiSenior = false;
+
+        foreach ($pengalaman as $exp) {
+            $tahunMasuk = (int)$exp->tahun_masuk;
+            $tahunKeluar = $exp->is_current ? date('Y') : (int)$exp->tahun_keluar;
+            if ($tahunKeluar && $tahunMasuk) {
+                $totalBulan += ($tahunKeluar - $tahunMasuk) * 12;
+            }
+
+            $jabatan = strtolower($exp->jabatan ?? '');
+            $seniorKeywords = ['senior', 'lead', 'manager', 'supervisor', 'kepala', 'ketua', 'direktur'];
+            foreach ($seniorKeywords as $keyword) {
+                if (strpos($jabatan, $keyword) !== false) {
+                    $posisiSenior = true;
+                    break;
+                }
+            }
+        }
+
+        if ($totalBulan >= 60) {
+            $nilai = 100;
+        } elseif ($totalBulan >= 36) {
+            $nilai = 90;
+        } elseif ($totalBulan >= 24) {
+            $nilai = 80;
+        } elseif ($totalBulan >= 12) {
+            $nilai = 70;
+        } elseif ($totalBulan > 0) {
+            $nilai = 60;
+        } else {
+            $nilai = 40;
+        }
+
+        if ($posisiSenior) {
+            $nilai = min(100, $nilai + 10);
+        }
+
+        return $nilai;
+    }
+
+    private function nilaiMagang($magang)
+    {
+        $jumlah = $magang->count();
+        if ($jumlah >= 2) return 100;
+        if ($jumlah == 1) return 70;
+        return 30;
+    }
+
+    private function nilaiOrganisasi($organisasi)
+    {
+        if ($organisasi->isEmpty()) {
+            return 30;
+        }
+
+        $posisiNilai = [
+            'Ketua' => 100,
+            'Wakil Ketua' => 95,
+            'Sekretaris' => 90,
+            'Bendahara' => 90,
+            'Koordinator' => 85,
+            'Pengurus' => 85,
+            'Anggota' => 70,
+        ];
+
+        $nilaiTertinggi = 0;
+        $totalOrganisasi = $organisasi->count();
+
+        foreach ($organisasi as $org) {
+            foreach ($posisiNilai as $key => $nilai) {
+                if (stripos($org->jabatan, $key) !== false) {
+                    $nilaiTertinggi = max($nilaiTertinggi, $nilai);
+                    break;
+                }
+            }
+
+            $nama = strtolower($org->nama_organisasi ?? '');
+            if (strpos($nama, 'internasional') !== false) {
+                $nilaiTertinggi = min(100, $nilaiTertinggi + 10);
+            } elseif (strpos($nama, 'nasional') !== false) {
+                $nilaiTertinggi = min(100, $nilaiTertinggi + 5);
+            }
+        }
+
+        if ($totalOrganisasi > 2) {
+            $nilaiTertinggi = min(100, $nilaiTertinggi + 5);
+        }
+
+        return $nilaiTertinggi > 0 ? $nilaiTertinggi : 70;
+    }
+
+    private function nilaiBahasa($bahasa)
+    {
+        if ($bahasa->isEmpty()) {
+            return 30;
+        }
+
+        $totalNilai = 0;
+        $tingkatNilai = [
+            'Native' => 100,
+            'Lancar' => 85,
+            'Aktif' => 70,
+            'Pasif' => 50,
+        ];
+
+        foreach ($bahasa as $b) {
+            $nilai = $tingkatNilai[$b->tingkat] ?? 50;
+            if ($b->sertifikat) {
+                $nilai = min(100, $nilai + 10);
+            }
+            $totalNilai += $nilai;
+        }
+
+        $rataRata = $totalNilai / $bahasa->count();
+        return round($rataRata, 2);
+    }
+
+    private function nilaiKeahlian($keahlian)
+    {
+        if ($keahlian->isEmpty()) {
+            return 40;
+        }
+
+        $totalNilai = 0;
+        $tingkatNilai = [
+            'Mahir' => 100,
+            'Lanjut' => 85,
+            'Menengah' => 70,
+            'Dasar' => 55,
+        ];
+
+        foreach ($keahlian as $k) {
+            $nilai = $tingkatNilai[$k->tingkat] ?? 60;
+            if ($k->sertifikat) {
+                $nilai = min(100, $nilai + 10);
+            }
+            $totalNilai += $nilai;
+        }
+
+        $rataRata = $totalNilai / $keahlian->count();
+        return round($rataRata, 2);
     }
 
     public function destroy(Berkas $berkas)

@@ -60,4 +60,33 @@ class Berkas extends Model
     {
         return $this->status_verifikasi !== 'Pending';
     }
+
+    public function getKelengkapanAttribute()
+    {
+        $totalDokumen = 12;
+        $dokumenTerisi = 0;
+
+        $fields = [
+            'cv_file',
+            'surat_lamaran_file',
+            'ijazah_file',
+            'transkrip_nilai_file',
+            'ktp_file',
+            'pas_foto_file',
+            'sertifikat_file',
+            'skck_file',
+            'surat_keterangan_sehat_file',
+            'portofolio_file',
+            'kartu_keluarga_file',
+            'dokumen_lain_file'
+        ];
+
+        foreach ($fields as $field) {
+            if (!empty($this->$field)) {
+                $dokumenTerisi++;
+            }
+        }
+
+        return round(($dokumenTerisi / $totalDokumen) * 100, 2);
+    }
 }

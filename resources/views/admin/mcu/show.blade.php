@@ -248,7 +248,7 @@
                                 <div class="info-card">
                                     <div class="info-icon"><i class="fas fa-syringe"></i></div>
                                     <div class="info-content">
-                                        <small class="text-muted d-block">Hasil Narkoba</small>
+                                        <small class="text-muted d-block">Hasil NAPZA</small>
                                         <h6 class="mb-0">{{ $mcu->hasil_narkoba ?? '-' }}</h6>
                                     </div>
                                 </div>

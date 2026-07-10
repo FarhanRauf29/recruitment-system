@@ -81,35 +81,56 @@ class SesiPsikotesController extends Controller
         $jumlahPerSesi = $request->jumlah_pelamar_per_sesi;
         $jumlahSesi = ceil($jumlahPelamar / $jumlahPerSesi);
 
-        $soalIds = collect();
-        if ($konfigurasi->jumlah_soal_kognitif > 0) {
-            $soalKognitif = SoalPsikotes::where('jenis', 'kognitif')
-                ->inRandomOrder()
-                ->limit($konfigurasi->jumlah_soal_kognitif)
-                ->pluck('id');
-            $soalIds = $soalIds->concat($soalKognitif);
-        }
-        if ($konfigurasi->jumlah_soal_kepribadian > 0) {
-            $soalKepribadian = SoalPsikotes::where('jenis', 'kepribadian')
-                ->inRandomOrder()
-                ->limit($konfigurasi->jumlah_soal_kepribadian)
-                ->pluck('id');
-            $soalIds = $soalIds->concat($soalKepribadian);
-        }
-        if ($konfigurasi->jumlah_soal_minat > 0) {
-            $soalMinat = SoalPsikotes::where('jenis', 'minat')
-                ->inRandomOrder()
-                ->limit($konfigurasi->jumlah_soal_minat)
-                ->pluck('id');
-            $soalIds = $soalIds->concat($soalMinat);
-        }
+        $totalSoalKognitif = $konfigurasi->jumlah_soal_kognitif;
+        $totalSoalKepribadian = $konfigurasi->jumlah_soal_kepribadian;
+        $totalSoalMinat = $konfigurasi->jumlah_soal_minat;
 
-        $totalSoal = $soalIds->count();
+        $allSoalKognitif = SoalPsikotes::where('jenis', 'kognitif')
+            ->where('aktif', true)
+            ->pluck('id')
+            ->toArray();
+
+        $allSoalKepribadian = SoalPsikotes::where('jenis', 'kepribadian')
+            ->where('aktif', true)
+            ->pluck('id')
+            ->toArray();
+
+        $allSoalMinat = SoalPsikotes::where('jenis', 'minat')
+            ->where('aktif', true)
+            ->pluck('id')
+            ->toArray();
+
+        $shuffleAllSoal = function ($arr) {
+            shuffle($arr);
+            return $arr;
+        };
+
         $createdSessions = 0;
         $chunks = $pelamarTahapans->chunk($jumlahPerSesi);
 
         foreach ($chunks as $index => $chunkPelamar) {
             foreach ($chunkPelamar as $pt) {
+                $soalIds = [];
+
+                $soalKognitif = $allSoalKognitif;
+                shuffle($soalKognitif);
+                $soalKognitif = array_slice($soalKognitif, 0, $totalSoalKognitif);
+                $soalIds = array_merge($soalIds, $soalKognitif);
+
+                $soalKepribadian = $allSoalKepribadian;
+                shuffle($soalKepribadian);
+                $soalKepribadian = array_slice($soalKepribadian, 0, $totalSoalKepribadian);
+                $soalIds = array_merge($soalIds, $soalKepribadian);
+
+                $soalMinat = $allSoalMinat;
+                shuffle($soalMinat);
+                $soalMinat = array_slice($soalMinat, 0, $totalSoalMinat);
+                $soalIds = array_merge($soalIds, $soalMinat);
+
+                shuffle($soalIds);
+
+                $totalSoal = count($soalIds);
+
                 do {
                     $token = Str::random(6);
                 } while (SesiPsikotes::where('token_sesi', $token)->exists());
@@ -124,7 +145,7 @@ class SesiPsikotesController extends Controller
                     'durasi_menit' => $konfigurasi->durasi_menit,
                     'status' => 'belum_dimulai',
                     'selesai' => false,
-                    'soal_terpilih' => $soalIds->toArray(),
+                    'soal_terpilih' => $soalIds,
                     'jumlah_soal_ditampilkan' => $totalSoal,
                     'token_sesi' => $token,
                     'ip_address' => null,
@@ -138,7 +159,7 @@ class SesiPsikotesController extends Controller
         }
 
         return redirect()->route('admin.sesipsikotes.index')
-            ->with('success', 'Sesi psikotes berhasil dibuat untuk ' . $createdSessions . ' pelamar dalam ' . $chunks->count());
+            ->with('success', 'Sesi psikotes berhasil dibuat untuk ' . $createdSessions . ' pelamar dalam ' . $chunks->count() . ' sesi. Setiap pelamar mendapat soal yang berbeda.');
     }
 
     public function edit($id)
@@ -165,30 +186,45 @@ class SesiPsikotesController extends Controller
         $waktuMulai = Carbon::parse($request->waktu_mulai);
         $waktuSelesai = $waktuMulai->copy()->addMinutes($konfigurasi->durasi_menit);
 
-        $soalIds = collect();
-        if ($konfigurasi->jumlah_soal_kognitif > 0) {
-            $soalKognitif = SoalPsikotes::where('jenis', 'kognitif')
-                ->inRandomOrder()
-                ->limit($konfigurasi->jumlah_soal_kognitif)
-                ->pluck('id');
-            $soalIds = $soalIds->concat($soalKognitif);
-        }
-        if ($konfigurasi->jumlah_soal_kepribadian > 0) {
-            $soalKepribadian = SoalPsikotes::where('jenis', 'kepribadian')
-                ->inRandomOrder()
-                ->limit($konfigurasi->jumlah_soal_kepribadian)
-                ->pluck('id');
-            $soalIds = $soalIds->concat($soalKepribadian);
-        }
-        if ($konfigurasi->jumlah_soal_minat > 0) {
-            $soalMinat = SoalPsikotes::where('jenis', 'minat')
-                ->inRandomOrder()
-                ->limit($konfigurasi->jumlah_soal_minat)
-                ->pluck('id');
-            $soalIds = $soalIds->concat($soalMinat);
-        }
+        $totalSoalKognitif = $konfigurasi->jumlah_soal_kognitif;
+        $totalSoalKepribadian = $konfigurasi->jumlah_soal_kepribadian;
+        $totalSoalMinat = $konfigurasi->jumlah_soal_minat;
 
-        $totalSoal = $soalIds->count();
+        $allSoalKognitif = SoalPsikotes::where('jenis', 'kognitif')
+            ->where('aktif', true)
+            ->pluck('id')
+            ->toArray();
+
+        $allSoalKepribadian = SoalPsikotes::where('jenis', 'kepribadian')
+            ->where('aktif', true)
+            ->pluck('id')
+            ->toArray();
+
+        $allSoalMinat = SoalPsikotes::where('jenis', 'minat')
+            ->where('aktif', true)
+            ->pluck('id')
+            ->toArray();
+
+        $soalIds = [];
+
+        $soalKognitif = $allSoalKognitif;
+        shuffle($soalKognitif);
+        $soalKognitif = array_slice($soalKognitif, 0, $totalSoalKognitif);
+        $soalIds = array_merge($soalIds, $soalKognitif);
+
+        $soalKepribadian = $allSoalKepribadian;
+        shuffle($soalKepribadian);
+        $soalKepribadian = array_slice($soalKepribadian, 0, $totalSoalKepribadian);
+        $soalIds = array_merge($soalIds, $soalKepribadian);
+
+        $soalMinat = $allSoalMinat;
+        shuffle($soalMinat);
+        $soalMinat = array_slice($soalMinat, 0, $totalSoalMinat);
+        $soalIds = array_merge($soalIds, $soalMinat);
+
+        shuffle($soalIds);
+
+        $totalSoal = count($soalIds);
         $sesi = SesiPsikotes::findOrFail($id);
 
         $sesi->update([
@@ -199,7 +235,7 @@ class SesiPsikotesController extends Controller
             'durasi_menit' => $konfigurasi->durasi_menit,
             'status' => 'belum_dimulai',
             'selesai' => false,
-            'soal_terpilih' => $soalIds->toArray(),
+            'soal_terpilih' => $soalIds,
             'jumlah_soal_ditampilkan' => $totalSoal,
             'jawaban_terisi' => [],
             'waktu_pause' => null,
@@ -301,7 +337,6 @@ class SesiPsikotesController extends Controller
             return redirect()->route('pelamar.psikotes.hasil', $sesi->token_sesi);
         }
 
-        // PERBAIKAN: Simpan session dengan durasi lebih lama
         $request->session()->put('valid_token', $sesi->token_sesi);
         $request->session()->put('sesi_started_at', now()->timestamp);
         $request->session()->put('pelamar_id', $pelamar->id);
@@ -339,7 +374,7 @@ class SesiPsikotesController extends Controller
             return redirect()->route('pelamar.psikotes.token')->with('warning', 'Silakan masukkan token terlebih dahulu.');
         }
 
-        if ($sesiStartedAt && (now()->timestamp - $sesiStartedAt) > 28800) { // 8 jam
+        if ($sesiStartedAt && (now()->timestamp - $sesiStartedAt) > 28800) {
             session()->forget(['valid_token', 'sesi_started_at', 'pelamar_id']);
             return redirect()->route('pelamar.psikotes.token')->with('warning', 'Session telah kadaluarsa. Silakan masukkan token kembali.');
         }
@@ -374,7 +409,6 @@ class SesiPsikotesController extends Controller
             ]);
             Log::info('Status dijeda diperbaiki ke sedang_berjalan saat pelamar kembali ke soal.', ['sesi_id' => $sesi->id]);
         } else {
-
             $sesi->update(['waktu_terakhir_aktivitas' => $now]);
         }
 
@@ -433,7 +467,6 @@ class SesiPsikotesController extends Controller
             return response()->json(['error' => 'Data pelamar tidak ditemukan.'], 401);
         }
 
-        // PERBAIKAN: Validasi session
         if (session('valid_token') !== $request->sesi_token || session('pelamar_id') !== $pelamar->id) {
             return response()->json(['error' => 'Session tidak valid.'], 401);
         }

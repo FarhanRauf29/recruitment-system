@@ -170,8 +170,12 @@ class SoalPsikotesController extends Controller
                         return $rows;
                     }
                 }, $file);
-                foreach ($rows[0] as $index => $row) {
-                    $this->prosesBarisSoal((array)$row, $index + 2, $imported, $errors);
+                if (isset($rows[0]) && count($rows[0]) > 0) {
+                    foreach ($rows[0] as $index => $row) {
+                        $this->prosesBarisSoal((array)$row, $index + 2, $imported, $errors);
+                    }
+                } else {
+                    $errors[] = 'File tidak memiliki data atau format tidak sesuai.';
                 }
             }
         } catch (\Exception $e) {
@@ -185,15 +189,21 @@ class SoalPsikotesController extends Controller
             return redirect()->route('admin.soalpsikotes.index')->with('success', $msg);
         }
         return redirect()->route('admin.soalpsikotes.index')
-            ->with('error', 'Tidak ada soal yang berhasil diimpor. <br>' . (!empty($errors) ? implode('<br>', $errors) : ''));
+            ->with('error', 'Tidak ada soal yang berhasil diimpor. <br>' . (!empty($errors) ? implode('<br>', $errors) : 'File tidak memiliki data yang valid.'));
     }
     private function prosesBarisSoal($row, $line, &$imported, &$errors)
     {
         $data = [];
         foreach ($row as $key => $value) {
             $normalizedKey = strtolower(str_replace([' ', '-', '_'], '', $key));
-            $data[$normalizedKey] = $value;
+            $data[$normalizedKey] = trim($value);
         }
+
+        if (empty($data)) {
+            $errors[] = "Baris $line: Data kosong, dilewati.";
+            return;
+        }
+
         $mapping = [
             'kodesoal' => ['kodesoal', 'kode', 'kode_soal', 'kodesoal'],
             'kategoriid' => ['kategoriid', 'kategori_id', 'kategori', 'idkategori'],
@@ -210,6 +220,7 @@ class SoalPsikotesController extends Controller
             'waktupersoaldetik' => ['waktupersoaldetik', 'waktu', 'time', 'duration'],
             'penjelasan' => ['penjelasan', 'explanation', 'desc']
         ];
+
         $extractedData = [];
         foreach ($mapping as $field => $possibleNames) {
             $extractedData[$field] = null;
@@ -220,6 +231,16 @@ class SoalPsikotesController extends Controller
                 }
             }
         }
+
+        if (empty($extractedData['kodesoal']) && empty($extractedData['pertanyaan'])) {
+            $errors[] = "Baris $line: Tidak ada data yang valid (kode_soal atau pertanyaan kosong).";
+            return;
+        }
+
+        if (empty($extractedData['kodesoal'])) {
+            $extractedData['kodesoal'] = 'SOAL-' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
+        }
+
         $validator = Validator::make($extractedData, [
             'kodesoal' => 'required|string|unique:soal_psikotes,kode_soal',
             'kategoriid' => 'required|exists:kategori_psikotes,id',
@@ -227,18 +248,21 @@ class SoalPsikotesController extends Controller
             'jenis' => 'required|in:kognitif,kepribadian,minat',
             'opsi_a' => 'required|string',
             'opsi_b' => 'required|string',
-            'kuncijawaban' => 'required|in:A,B,C,D,E,a,b,c,d,e',
-            'bobotnilai' => 'required|integer|min:1',
-            'tingkatkesulitan' => 'required|integer|between:1,5',
-            'waktupersoaldetik' => 'required|integer|min:10',
+            'kuncijawaban' => 'nullable|in:A,B,C,D,E,a,b,c,d,e',
+            'bobotnilai' => 'nullable|integer|min:1',
+            'tingkatkesulitan' => 'nullable|integer|between:1,5',
+            'waktupersoaldetik' => 'nullable|integer|min:10',
         ], [
             'kategoriid.exists' => 'Kategori ID tidak ditemukan dalam database.',
             'kuncijawaban.in' => 'Kunci jawaban harus A, B, C, D, atau E.',
+            'kodesoal.unique' => 'Kode soal sudah ada di database.',
         ]);
+
         if ($validator->fails()) {
             $errors[] = "Baris $line: " . implode(", ", $validator->errors()->all());
             return;
         }
+
         $opsi = [];
         foreach (['a', 'b', 'c', 'd', 'e'] as $huruf) {
             $key = 'opsi_' . $huruf;
@@ -246,10 +270,12 @@ class SoalPsikotesController extends Controller
                 $opsi[strtoupper($huruf)] = $extractedData[$key];
             }
         }
+
         if (count($opsi) < 2) {
             $errors[] = "Baris $line: Soal harus memiliki minimal 2 opsi jawaban.";
             return;
         }
+
         try {
             SoalPsikotes::create([
                 'kode_soal' => $extractedData['kodesoal'],
@@ -257,10 +283,10 @@ class SoalPsikotesController extends Controller
                 'pertanyaan' => $extractedData['pertanyaan'],
                 'jenis' => $extractedData['jenis'],
                 'opsi_jawaban' => $opsi,
-                'kunci_jawaban' => strtoupper($extractedData['kuncijawaban']),
-                'bobot_nilai' => $extractedData['bobotnilai'],
-                'tingkat_kesulitan' => $extractedData['tingkatkesulitan'],
-                'waktu_per_soal_detik' => $extractedData['waktupersoaldetik'],
+                'kunci_jawaban' => !empty($extractedData['kuncijawaban']) ? strtoupper($extractedData['kuncijawaban']) : null,
+                'bobot_nilai' => !empty($extractedData['bobotnilai']) ? $extractedData['bobotnilai'] : 5,
+                'tingkat_kesulitan' => !empty($extractedData['tingkatkesulitan']) ? $extractedData['tingkatkesulitan'] : 3,
+                'waktu_per_soal_detik' => !empty($extractedData['waktupersoaldetik']) ? $extractedData['waktupersoaldetik'] : 60,
                 'penjelasan' => $extractedData['penjelasan'] ?? null,
                 'aktif' => true,
             ]);
@@ -283,35 +309,6 @@ class SoalPsikotesController extends Controller
             ->with(['tahapan', 'lowongan'])
             ->get();
         return view('pelamar.psikotes.index', compact('tahapanPsikotes'));
-    }
-    public function showSoalPsikotes($token)
-    {
-        $user = Auth::user();
-        $pelamar = $user->pelamar;
-        if (!$pelamar) {
-            return redirect()->route('pelamar.dashboard')->with('error', 'Data pelamar tidak ditemukan.');
-        }
-        $sesi = SesiPsikotes::where('token_sesi', $token)
-            ->where('pelamar_id', $pelamar->id)
-            ->first();
-        if (!$sesi) {
-            return redirect()->route('pelamar.psikotes.index')->with('error', 'Sesi psikotes tidak ditemukan.');
-        }
-        if ($sesi->selesai) {
-            return redirect()->route('pelamar.psikotes.hasil', $token);
-        }
-        $soalIds = $sesi->soal_terpilih ?? [];
-        $soalTersedia = SoalPsikotes::whereIn('id', $soalIds)
-            ->with('kategori')
-            ->get()
-            ->keyBy('id');
-        $jawabanSudah = JawabanPsikotes::where('sesi_psikotes_id', $sesi->id)
-            ->pluck('jawaban', 'soal_id')
-            ->toArray();
-        $totalSoal = count($soalIds);
-        $soalDijawab = count($jawabanSudah);
-        $progress = $totalSoal > 0 ? round(($soalDijawab / $totalSoal) * 100, 2) : 0;
-        return view('pelamar.psikotes.soal', compact('sesi', 'soalTersedia', 'jawabanSudah', 'progress'));
     }
 }
 class SoalTemplateExport implements FromCollection, WithHeadings, WithStyles, WithEvents

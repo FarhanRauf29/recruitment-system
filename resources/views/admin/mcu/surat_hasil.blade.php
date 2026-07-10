@@ -300,7 +300,7 @@
                         <td>{{ $mcu->buta_warna ?? '-' }}</td>
                     </tr>
                     <tr>
-                        <td>Hasil Tes Narkoba</td>
+                        <td>Hasil Tes NAPZA</td>
                         <td>{{ $mcu->hasil_narkoba ?? '-' }}</td>
                     </tr>
                     <tr>

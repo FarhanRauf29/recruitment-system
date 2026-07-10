@@ -96,7 +96,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold">Hasil Tes Narkoba</label>
+                                        <label class="form-label fw-semibold">Hasil Tes NAPZA</label>
                                         <select name="hasil_narkoba" class="form-select">
                                             <option value="">-- Pilih --</option>
                                             <option value="Positif"
@@ -106,6 +106,7 @@
                                                 {{ old('hasil_narkoba', $mcu->hasil_narkoba) == 'Negatif' ? 'selected' : '' }}>
                                                 Negatif</option>
                                         </select>
+                                        <small class="text-muted">Contoh: Narkotika, Psikotropika, Zat Adiktif</small>
                                     </div>
                                 </div>
                                 <div class="col-md-8">

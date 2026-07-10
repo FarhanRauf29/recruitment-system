@@ -172,7 +172,12 @@ class PelamarProfilController extends Controller
         $nilaiBahasa = $this->nilaiBahasa($bahasa);
         $nilaiKeahlian = $this->nilaiKeahlian($keahlian);
 
-        $totalNilai = ($nilaiPendidikan * 0.30) + ($nilaiPengalaman * 0.25) + ($nilaiMagang * 0.10) + ($nilaiOrganisasi * 0.15) + ($nilaiBahasa * 0.10) + ($nilaiKeahlian * 0.10);
+        $totalNilai = ($nilaiPendidikan * 0.25) +
+            ($nilaiPengalaman * 0.20) +
+            ($nilaiOrganisasi * 0.10) +
+            ($nilaiMagang * 0.10) +
+            ($nilaiBahasa * 0.075) +
+            ($nilaiKeahlian * 0.075);
 
         return round($totalNilai, 2);
     }
@@ -186,7 +191,8 @@ class PelamarProfilController extends Controller
             'D3' => 75,
             'D4' => 80,
             'S1' => 85,
-            'S2' => 100,
+            'S2' => 95,
+            'S3' => 100,
         ];
 
         if ($pendidikan->isEmpty()) {
@@ -197,7 +203,22 @@ class PelamarProfilController extends Controller
             return $tingkatNilai[$item->tingkat] ?? 0;
         })->first();
 
-        return $tingkatNilai[$tertinggi->tingkat] ?? 60;
+        $nilai = $tingkatNilai[$tertinggi->tingkat] ?? 60;
+
+        if ($tertinggi->nilai && is_numeric($tertinggi->nilai)) {
+            $ipk = (float)$tertinggi->nilai;
+            if ($ipk >= 3.51) {
+                $nilai = min(100, $nilai + 10);
+            } elseif ($ipk >= 3.00) {
+                $nilai = min(100, $nilai + 5);
+            } elseif ($ipk >= 2.50) {
+                $nilai = $nilai;
+            } else {
+                $nilai = max(0, $nilai - 5);
+            }
+        }
+
+        return min(100, $nilai);
     }
 
     private function nilaiPengalaman($pengalaman)
@@ -207,26 +228,50 @@ class PelamarProfilController extends Controller
         }
 
         $totalBulan = 0;
+        $posisiSenior = false;
+
         foreach ($pengalaman as $exp) {
             $tahunMasuk = (int)$exp->tahun_masuk;
             $tahunKeluar = $exp->is_current ? date('Y') : (int)$exp->tahun_keluar;
             if ($tahunKeluar && $tahunMasuk) {
                 $totalBulan += ($tahunKeluar - $tahunMasuk) * 12;
             }
+
+            $jabatan = strtolower($exp->jabatan ?? '');
+            $seniorKeywords = ['senior', 'lead', 'manager', 'supervisor', 'kepala', 'ketua', 'direktur'];
+            foreach ($seniorKeywords as $keyword) {
+                if (strpos($jabatan, $keyword) !== false) {
+                    $posisiSenior = true;
+                    break;
+                }
+            }
         }
 
-        if ($totalBulan >= 60) return 100;
-        if ($totalBulan >= 36) return 90;
-        if ($totalBulan >= 24) return 80;
-        if ($totalBulan >= 12) return 70;
-        if ($totalBulan > 0) return 60;
-        return 40;
+        if ($totalBulan >= 60) {
+            $nilai = 100;
+        } elseif ($totalBulan >= 36) {
+            $nilai = 90;
+        } elseif ($totalBulan >= 24) {
+            $nilai = 80;
+        } elseif ($totalBulan >= 12) {
+            $nilai = 70;
+        } elseif ($totalBulan > 0) {
+            $nilai = 60;
+        } else {
+            $nilai = 40;
+        }
+
+        if ($posisiSenior) {
+            $nilai = min(100, $nilai + 10);
+        }
+
+        return $nilai;
     }
 
     private function nilaiMagang($magang)
     {
         $jumlah = $magang->count();
-        if ($jumlah > 1) return 100;
+        if ($jumlah >= 2) return 100;
         if ($jumlah == 1) return 70;
         return 30;
     }
@@ -248,6 +293,8 @@ class PelamarProfilController extends Controller
         ];
 
         $nilaiTertinggi = 0;
+        $totalOrganisasi = $organisasi->count();
+
         foreach ($organisasi as $org) {
             foreach ($posisiNilai as $key => $nilai) {
                 if (stripos($org->jabatan, $key) !== false) {
@@ -255,6 +302,17 @@ class PelamarProfilController extends Controller
                     break;
                 }
             }
+
+            $nama = strtolower($org->nama_organisasi ?? '');
+            if (strpos($nama, 'internasional') !== false) {
+                $nilaiTertinggi = min(100, $nilaiTertinggi + 10);
+            } elseif (strpos($nama, 'nasional') !== false) {
+                $nilaiTertinggi = min(100, $nilaiTertinggi + 5);
+            }
+        }
+
+        if ($totalOrganisasi > 2) {
+            $nilaiTertinggi = min(100, $nilaiTertinggi + 5);
         }
 
         return $nilaiTertinggi > 0 ? $nilaiTertinggi : 70;
@@ -262,20 +320,54 @@ class PelamarProfilController extends Controller
 
     private function nilaiBahasa($bahasa)
     {
-        $jumlah = $bahasa->count();
-        if ($jumlah > 2) return 100;
-        if ($jumlah == 2) return 75;
-        if ($jumlah == 1) return 50;
-        return 30;
+        if ($bahasa->isEmpty()) {
+            return 30;
+        }
+
+        $totalNilai = 0;
+        $tingkatNilai = [
+            'Native' => 100,
+            'Lancar' => 85,
+            'Aktif' => 70,
+            'Pasif' => 50,
+        ];
+
+        foreach ($bahasa as $b) {
+            $nilai = $tingkatNilai[$b->tingkat] ?? 50;
+            if ($b->sertifikat) {
+                $nilai = min(100, $nilai + 10);
+            }
+            $totalNilai += $nilai;
+        }
+
+        $rataRata = $totalNilai / $bahasa->count();
+        return round($rataRata, 2);
     }
 
     private function nilaiKeahlian($keahlian)
     {
-        $jumlah = $keahlian->count();
-        if ($jumlah > 5) return 100;
-        if ($jumlah >= 3) return 80;
-        if ($jumlah >= 1) return 60;
-        return 40;
+        if ($keahlian->isEmpty()) {
+            return 40;
+        }
+
+        $totalNilai = 0;
+        $tingkatNilai = [
+            'Mahir' => 100,
+            'Lanjut' => 85,
+            'Menengah' => 70,
+            'Dasar' => 55,
+        ];
+
+        foreach ($keahlian as $k) {
+            $nilai = $tingkatNilai[$k->tingkat] ?? 60;
+            if ($k->sertifikat) {
+                $nilai = min(100, $nilai + 10);
+            }
+            $totalNilai += $nilai;
+        }
+
+        $rataRata = $totalNilai / $keahlian->count();
+        return round($rataRata, 2);
     }
 
     public function simpanNilaiAdministrasi($pelamarId, $lowonganId)
@@ -290,7 +382,21 @@ class PelamarProfilController extends Controller
         $bahasa = RiwayatBahasa::where('pelamar_id', $pelamarId)->get();
         $keahlian = RiwayatKeahlian::where('pelamar_id', $pelamarId)->get();
 
-        $nilai = $this->hitungNilaiAdministrasi($pelamar, $pendidikan, $pengalaman, $magang, $organisasi, $bahasa, $keahlian);
+        $nilaiPendidikan = $this->nilaiPendidikan($pendidikan);
+        $nilaiPengalaman = $this->nilaiPengalaman($pengalaman);
+        $nilaiMagang = $this->nilaiMagang($magang);
+        $nilaiOrganisasi = $this->nilaiOrganisasi($organisasi);
+        $nilaiBahasa = $this->nilaiBahasa($bahasa);
+        $nilaiKeahlian = $this->nilaiKeahlian($keahlian);
+
+        $nilai = ($nilaiPendidikan * 0.25) +
+            ($nilaiPengalaman * 0.20) +
+            ($nilaiOrganisasi * 0.10) +
+            ($nilaiMagang * 0.10) +
+            ($nilaiBahasa * 0.075) +
+            ($nilaiKeahlian * 0.075);
+
+        $nilai = round($nilai, 2);
 
         $kriteriaAdministrasi = Kriteria::where('nama_kriteria', 'like', '%administrasi%')
             ->orWhere('nama_kriteria', 'like', '%berkas%')
@@ -306,7 +412,7 @@ class PelamarProfilController extends Controller
                 ],
                 [
                     'nilai' => $nilai,
-                    'catatan' => 'Nilai otomatis dari profil pelamar',
+                    'catatan' => 'Nilai otomatis dari profil pelamar. Pendidikan: ' . $nilaiPendidikan . ', Pengalaman: ' . $nilaiPengalaman . ', Organisasi: ' . $nilaiOrganisasi . ', Magang: ' . $nilaiMagang . ', Bahasa: ' . $nilaiBahasa . ', Keahlian: ' . $nilaiKeahlian,
                 ]
             );
         }
