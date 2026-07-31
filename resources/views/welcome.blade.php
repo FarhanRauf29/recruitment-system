@@ -59,7 +59,6 @@
             padding: 0 32px;
         }
 
-        /* Navbar */
         #navbar {
             position: fixed;
             top: 0;
@@ -84,7 +83,6 @@
             gap: 32px;
         }
 
-        /* Logo Premium */
         .nav-logo {
             display: flex;
             align-items: center;
@@ -150,7 +148,6 @@
             color: var(--gray-600);
         }
 
-        /* Navigation */
         .nav-links {
             display: flex;
             gap: 8px;
@@ -191,7 +188,6 @@
             background: rgba(212, 161, 30, 0.1);
         }
 
-        /* Buttons */
         .nav-actions {
             display: flex;
             gap: 12px;
@@ -261,7 +257,6 @@
             color: var(--primary);
         }
 
-        /* Mobile Menu */
         .mobile-nav {
             position: fixed;
             inset: 0;
@@ -320,7 +315,6 @@
             justify-content: center;
         }
 
-        /* Hero Section */
         #hero {
             position: relative;
             width: 100%;
@@ -530,7 +524,6 @@
             }
         }
 
-        /* Stats */
         .stats-strip {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             padding: 60px 0;
@@ -572,7 +565,6 @@
             font-weight: 500;
         }
 
-        /* Sections */
         section {
             padding: 100px 0;
         }
@@ -616,7 +608,6 @@
             border-radius: 3px;
         }
 
-        /* About */
         #about {
             background: var(--gray-50);
         }
@@ -759,7 +750,6 @@
             box-shadow: var(--shadow-lg);
         }
 
-        /* Vacancy */
         .vacancy-filter {
             display: flex;
             justify-content: center;
@@ -794,7 +784,7 @@
         .vacancy-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
+            gap: 24px;
             margin-bottom: 48px;
         }
 
@@ -802,10 +792,13 @@
             background: var(--white);
             border: 1px solid var(--gray-200);
             border-radius: 24px;
-            padding: 28px;
+            padding: 32px 24px;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 280px;
         }
 
         .vacancy-card::before {
@@ -842,6 +835,7 @@
             font-weight: 700;
             color: var(--gray-600);
             margin-bottom: 16px;
+            align-self: flex-start;
         }
 
         .vacancy-card h3 {
@@ -857,6 +851,7 @@
             color: var(--gray-600);
             margin-bottom: 20px;
             line-height: 1.6;
+            flex-grow: 1;
         }
 
         .vacancy-meta {
@@ -885,6 +880,7 @@
             align-items: center;
             padding-top: 16px;
             border-top: 1px solid var(--gray-200);
+            margin-top: auto;
         }
 
         .vacancy-deadline {
@@ -934,7 +930,6 @@
             transform: translateY(-2px);
         }
 
-        /* Why Join */
         #why {
             background: linear-gradient(145deg, var(--primary), var(--primary-dark));
             color: var(--white);
@@ -955,6 +950,11 @@
             padding: 32px 24px;
             transition: all 0.3s;
             text-align: center;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .why-card:hover {
@@ -988,7 +988,153 @@
             line-height: 1.6;
         }
 
-        /* Process */
+        /* EVENT CARDS - SAME SIZE AS VACANCY AND WHY CARDS */
+        .event-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+        }
+
+        .event-card {
+            background: var(--gray-50);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
+        .event-img {
+            height: 180px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .event-img i {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .event-body {
+            padding: 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-tag {
+            display: inline-block;
+            background: rgba(212, 161, 30, 0.15);
+            color: var(--accent);
+            padding: 4px 14px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            align-self: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .event-body h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .event-body p {
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            margin-top: auto;
+        }
+
+        .event-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .event-meta i {
+            color: var(--accent);
+        }
+
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .event-list-item {
+            background: var(--gray-50);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s;
+            min-height: 100px;
+        }
+
+        .event-list-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: transparent;
+        }
+
+        .event-date-box {
+            background: var(--primary);
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 60px;
+            flex-shrink: 0;
+        }
+
+        .event-date-box .day {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1;
+        }
+
+        .event-date-box .month {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+        }
+
+        .event-list-item h4 {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .event-list-item p {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+
         .process-steps {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -1049,7 +1195,6 @@
             color: var(--gray-500);
         }
 
-        /* CTA */
         #cta-banner {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             padding: 80px 0;
@@ -1105,7 +1250,6 @@
             box-shadow: 0 12px 30px rgba(212, 161, 30, 0.4);
         }
 
-        /* Footer */
         footer {
             background: #0A1C16;
             color: rgba(255, 255, 255, 0.6);
@@ -1236,7 +1380,6 @@
             text-decoration: none;
         }
 
-        /* Reveal */
         .reveal {
             opacity: 0;
             transform: translateY(30px);
@@ -1260,7 +1403,6 @@
             transition-delay: 0.3s;
         }
 
-        /* Responsive */
         @media (max-width: 1024px) {
             .vacancy-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1268,6 +1410,10 @@
 
             .why-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .event-grid {
+                grid-template-columns: 1fr;
             }
 
             .process-steps {
@@ -1309,6 +1455,10 @@
             }
 
             .why-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .event-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -1479,100 +1629,47 @@
             </div>
             <div class="vacancy-filter reveal">
                 <button class="filter-btn active" onclick="filterVacancy(this, 'all')">Semua Posisi</button>
-                <button class="filter-btn" onclick="filterVacancy(this, 'kebun')">Perkebunan</button>
-                <button class="filter-btn" onclick="filterVacancy(this, 'industri')">Industri</button>
-                <button class="filter-btn" onclick="filterVacancy(this, 'teknik')">Teknik</button>
-                <button class="filter-btn" onclick="filterVacancy(this, 'admin')">Administrasi</button>
+                @php
+                    $categories = ['Perkebunan', 'Industri', 'Teknik', 'Administrasi', 'IT'];
+                @endphp
+                @foreach ($categories as $cat)
+                    <button class="filter-btn"
+                        onclick="filterVacancy(this, '{{ strtolower($cat) }}')">{{ $cat }}</button>
+                @endforeach
             </div>
             <div class="vacancy-grid">
-                <div class="vacancy-card reveal" data-cat="kebun">
-                    <span class="vacancy-dept"><i class="fas fa-leaf"></i> Perkebunan</span>
-                    <h3>Asisten Kebun</h3>
-                    <p>Bertanggung jawab dalam pengawasan operasional kebun kelapa hibrida dan pelaporan hasil panen
-                        harian.</p>
-                    <div class="vacancy-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Indragiri Hilir, Riau</span>
-                        <span><i class="fas fa-briefcase"></i> Full-time</span>
+                @forelse($lowongans as $index => $lowongan)
+                    <div class="vacancy-card reveal {{ $index % 3 == 1 ? 'reveal-delay-1' : ($index % 3 == 2 ? 'reveal-delay-2' : '') }}"
+                        data-cat="{{ strtolower($lowongan->kategori ?? 'lainnya') }}">
+                        <span class="vacancy-dept">
+                            <i class="fas {{ $lowongan->icon ?? 'fa-briefcase' }}"></i>
+                            {{ $lowongan->kategori ?? 'Umum' }}
+                        </span>
+                        <h3>{{ $lowongan->judul_lowongan }}</h3>
+                        <p>{{ Str::limit($lowongan->deskripsi, 120) }}</p>
+                        <div class="vacancy-meta">
+                            <span><i class="fas fa-map-marker-alt"></i> {{ $lowongan->lokasi ?? 'Riau' }}</span>
+                            <span><i class="fas fa-briefcase"></i> Full-time</span>
+                        </div>
+                        <div class="vacancy-footer">
+                            <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup
+                                {{ \Carbon\Carbon::parse($lowongan->tanggal_tutup)->translatedFormat('d M Y') }}</span>
+                            <a href="{{ route('lowongan.detail', $lowongan->id) }}">
+                                <button class="btn-apply">Lamar →</button>
+                            </a>
+                        </div>
                     </div>
-                    <div class="vacancy-footer">
-                        <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup 31 Jul 2026</span>
-                        <a href="/register"><button class="btn-apply">Lamar →</button></a>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Belum ada lowongan yang tersedia saat ini.</p>
                     </div>
-                </div>
-                <div class="vacancy-card reveal reveal-delay-1" data-cat="industri">
-                    <span class="vacancy-dept"><i class="fas fa-industry"></i> Industri</span>
-                    <h3>Operator Produksi</h3>
-                    <p>Menjalankan dan memantau proses produksi minyak kelapa dan produk turunan sesuai standar mutu
-                        perusahaan.</p>
-                    <div class="vacancy-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Kuala Enok, Riau</span>
-                        <span><i class="fas fa-briefcase"></i> Full-time</span>
-                    </div>
-                    <div class="vacancy-footer">
-                        <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup 15 Agt 2026</span>
-                        <a href="/register"><button class="btn-apply">Lamar →</button></a>
-                    </div>
-                </div>
-                <div class="vacancy-card reveal reveal-delay-2" data-cat="teknik">
-                    <span class="vacancy-dept"><i class="fas fa-cogs"></i> Teknik</span>
-                    <h3>Teknisi Mesin & Elektrik</h3>
-                    <p>Pemeliharaan dan perbaikan mesin produksi, instalasi listrik, serta memastikan kelancaran
-                        operasional pabrik.</p>
-                    <div class="vacancy-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Guntung, Riau</span>
-                        <span><i class="fas fa-briefcase"></i> Full-time</span>
-                    </div>
-                    <div class="vacancy-footer">
-                        <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup 20 Agt 2026</span>
-                        <a href="/register"><button class="btn-apply">Lamar →</button></a>
-                    </div>
-                </div>
-                <div class="vacancy-card reveal reveal-delay-1" data-cat="admin">
-                    <span class="vacancy-dept"><i class="fas fa-file-alt"></i> Administrasi</span>
-                    <h3>Staf Administrasi HRD</h3>
-                    <p>Mengelola administrasi kepegawaian, rekrutmen, serta mendukung program pengembangan sumber daya
-                        manusia.</p>
-                    <div class="vacancy-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Pekanbaru, Riau</span>
-                        <span><i class="fas fa-briefcase"></i> Full-time</span>
-                    </div>
-                    <div class="vacancy-footer">
-                        <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup 10 Agt 2026</span>
-                        <a href="/register"><button class="btn-apply">Lamar →</button></a>
-                    </div>
-                </div>
-                <div class="vacancy-card reveal reveal-delay-2" data-cat="kebun">
-                    <span class="vacancy-dept"><i class="fas fa-seedling"></i> Perkebunan</span>
-                    <h3>Mandor Kebun</h3>
-                    <p>Memimpin tim pemanen dan memastikan target produksi kebun harian tercapai sesuai standar
-                        perusahaan.</p>
-                    <div class="vacancy-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Indragiri Hilir, Riau</span>
-                        <span><i class="fas fa-briefcase"></i> Full-time</span>
-                    </div>
-                    <div class="vacancy-footer">
-                        <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup 31 Jul 2026</span>
-                        <a href="/register"><button class="btn-apply">Lamar →</button></a>
-                    </div>
-                </div>
-                <div class="vacancy-card reveal reveal-delay-3" data-cat="teknik">
-                    <span class="vacancy-dept"><i class="fas fa-laptop-code"></i> IT</span>
-                    <h3>IT Support & Network</h3>
-                    <p>Mengelola infrastruktur IT perusahaan, jaringan komputer, serta memberikan dukungan teknis kepada
-                        pengguna.</p>
-                    <div class="vacancy-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> Pekanbaru, Riau</span>
-                        <span><i class="fas fa-briefcase"></i> Full-time</span>
-                    </div>
-                    <div class="vacancy-footer">
-                        <span class="vacancy-deadline"><i class="fas fa-clock"></i> Tutup 25 Agt 2026</span>
-                        <a href="/register"><button class="btn-apply">Lamar →</button></a>
-                    </div>
-                </div>
+                @endforelse
             </div>
             <div class="vacancy-cta reveal">
-                <button class="btn-outline-navy" onclick="location.href='/vacancy'"><i class="fas fa-th-list"></i>
-                    Lihat Semua Lowongan</button>
+                <a href="{{ route('lowongan.list') }}">
+                    <button class="btn-outline-navy"><i class="fas fa-th-list"></i> Lihat Semua Lowongan</button>
+                </a>
             </div>
         </div>
     </section>
@@ -1611,6 +1708,7 @@
         </div>
     </section>
 
+    <!-- PERBAIKAN: Bagian Event dengan ukuran card yang konsisten -->
     <section id="event">
         <div class="container">
             <div class="section-header reveal">
@@ -1619,45 +1717,43 @@
                 <div class="divider"></div>
                 <p>Ikuti berbagai program rekrutmen, job fair, dan kegiatan perusahaan.</p>
             </div>
-            <div class="event-grid" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 36px;">
-                <div class="event-card" style="background: var(--gray-50); border-radius: 24px; overflow: hidden;">
-                    <div class="event-img"
-                        style="height: 200px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-calendar-alt fa-3x" style="color: rgba(255,255,255,0.3);"></i></div>
-                    <div class="event-body" style="padding: 28px;">
-                        <span class="event-tag" style="background: rgba(212,161,30,0.15); color: var(--accent);">Job
-                            Fair</span>
-                        <h3 style="font-family: var(--font-heading); font-size: 1.2rem;">Rekrutmen Besar-besaran RSUP
-                            2026</h3>
-                        <p style="color: var(--gray-600);">Membuka ratusan posisi dalam sesi rekrutmen langsung.</p>
-                        <div class="event-meta" style="display: flex; gap: 20px; font-size: 0.85rem;"><span><i
-                                    class="fas fa-calendar"></i> 15–16 Agustus 2026</span><span><i
-                                    class="fas fa-map-marker-alt"></i> Pekanbaru</span></div>
+            <div class="event-grid">
+                <!-- Card Event Utama - Sama ukuran dengan card lainnya -->
+                <div class="event-card reveal">
+                    <div class="event-img">
+                        <i class="fas fa-calendar-alt fa-3x"></i>
+                    </div>
+                    <div class="event-body">
+                        <span class="event-tag">Job Fair</span>
+                        <h3>Rekrutmen Besar-besaran RSUP 2026</h3>
+                        <p>Membuka ratusan posisi dalam sesi rekrutmen langsung.</p>
+                        <div class="event-meta">
+                            <span><i class="fas fa-calendar"></i> 15–16 Agustus 2026</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Pekanbaru</span>
+                        </div>
                     </div>
                 </div>
-                <div class="event-list" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="event-list-item"
-                        style="background: var(--gray-50); border-radius: 20px; padding: 20px; display: flex; gap: 16px;">
-                        <div class="event-date-box"
-                            style="background: var(--primary); border-radius: 12px; padding: 12px 16px; text-align: center;">
-                            <div class="day" style="font-size: 1.4rem; font-weight: 800;">22</div>
-                            <div class="month" style="font-size: 0.7rem;">Jul</div>
+
+                <!-- List Event Samping -->
+                <div class="event-list">
+                    <div class="event-list-item reveal reveal-delay-1">
+                        <div class="event-date-box">
+                            <div class="day">22</div>
+                            <div class="month">Jul</div>
                         </div>
                         <div>
-                            <h4 style="font-weight: 800;">Campus Hiring Universitas Riau</h4>
-                            <p style="font-size: 0.85rem;">Rekrutmen khusus fresh graduate</p>
+                            <h4>Campus Hiring Universitas Riau</h4>
+                            <p>Rekrutmen khusus fresh graduate</p>
                         </div>
                     </div>
-                    <div class="event-list-item"
-                        style="background: var(--gray-50); border-radius: 20px; padding: 20px; display: flex; gap: 16px;">
-                        <div class="event-date-box"
-                            style="background: var(--primary); border-radius: 12px; padding: 12px 16px; text-align: center;">
-                            <div class="day" style="font-size: 1.4rem; font-weight: 800;">05</div>
-                            <div class="month" style="font-size: 0.7rem;">Agt</div>
+                    <div class="event-list-item reveal reveal-delay-2">
+                        <div class="event-date-box">
+                            <div class="day">05</div>
+                            <div class="month">Agt</div>
                         </div>
                         <div>
-                            <h4 style="font-weight: 800;">Webinar Karir: Berkarir di Perkebunan</h4>
-                            <p style="font-size: 0.85rem;">Sesi online gratis</p>
+                            <h4>Webinar Karir: Berkarir di Perkebunan</h4>
+                            <p>Sesi online gratis</p>
                         </div>
                     </div>
                 </div>
@@ -1714,7 +1810,8 @@
                 <div class="news-card" style="background: var(--gray-50); border-radius: 24px; overflow: hidden;">
                     <div class="news-img"
                         style="height: 200px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-star fa-2x" style="color: rgba(255,255,255,0.3);"></i></div>
+                        <i class="fas fa-star fa-2x" style="color: rgba(255,255,255,0.3);"></i>
+                    </div>
                     <div class="news-body" style="padding: 24px;">
                         <div class="news-date" style="font-size: 0.8rem;"><i class="fas fa-calendar"></i> 30
                             September 2025</div>
@@ -1728,7 +1825,8 @@
                 <div class="news-card" style="background: var(--gray-50); border-radius: 24px; overflow: hidden;">
                     <div class="news-img"
                         style="height: 200px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-users fa-2x" style="color: rgba(255,255,255,0.3);"></i></div>
+                        <i class="fas fa-users fa-2x" style="color: rgba(255,255,255,0.3);"></i>
+                    </div>
                     <div class="news-body" style="padding: 24px;">
                         <div class="news-date" style="font-size: 0.8rem;"><i class="fas fa-calendar"></i> 15 Agustus
                             2025</div>
@@ -1742,7 +1840,8 @@
                 <div class="news-card" style="background: var(--gray-50); border-radius: 24px; overflow: hidden;">
                     <div class="news-img"
                         style="height: 200px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-handshake fa-2x" style="color: rgba(255,255,255,0.3);"></i></div>
+                        <i class="fas fa-handshake fa-2x" style="color: rgba(255,255,255,0.3);"></i>
+                    </div>
                     <div class="news-body" style="padding: 24px;">
                         <div class="news-date" style="font-size: 0.8rem;"><i class="fas fa-calendar"></i> 18 Juli
                             2025</div>
@@ -1810,11 +1909,14 @@
                 <div class="footer-col">
                     <h4>Posisi Populer</h4>
                     <ul>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Asisten Kebun</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Operator Produksi</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Teknisi Mesin</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Staf Administrasi</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> IT Support</a></li>
+                        @if (isset($lowongans) && $lowongans->count() > 0)
+                            @foreach ($lowongans->take(5) as $lowongan)
+                                <li><a href="{{ route('lowongan.detail', $lowongan->id) }}"><i
+                                            class="fas fa-chevron-right"></i> {{ $lowongan->judul_lowongan }}</a></li>
+                            @endforeach
+                        @else
+                            <li><a href="#"><i class="fas fa-chevron-right"></i> Belum ada lowongan</a></li>
+                        @endif
                     </ul>
                 </div>
                 <div class="footer-col">

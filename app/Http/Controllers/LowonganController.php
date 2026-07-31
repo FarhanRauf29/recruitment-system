@@ -329,4 +329,14 @@ class LowonganController extends Controller
 
         return view('pelamar.lowongan.show', compact('lowongan'));
     }
+    public function welcome()
+    {
+        $lowongans = Lowongan::where('status', 'buka')
+            ->whereDate('tanggal_tutup', '>=', now())
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
+
+        return view('welcome', compact('lowongans'));
+    }
 }

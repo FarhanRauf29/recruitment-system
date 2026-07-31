@@ -24,9 +24,9 @@ use App\Http\Controllers\HiringOnboardingController;
 
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [LowonganController::class, 'welcome'])->name('welcome');
+Route::get('/lowongan/list', [LowonganController::class, 'listLowongan'])->name('lowongan.list');
+Route::get('/lowongan/detail/{id}', [LowonganController::class, 'showLowongan'])->name('lowongan.detail');
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
