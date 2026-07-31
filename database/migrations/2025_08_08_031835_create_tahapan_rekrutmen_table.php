@@ -6,14 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tahapan_rekrutmen', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_tahapan');
+            $table->string('nama_tahapan', 100);
             $table->text('deskripsi')->nullable();
             $table->integer('urutan');
             $table->enum('status', ['aktif', 'tidak_aktif'])->default('aktif');
@@ -21,9 +18,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tahapan_rekrutmen');

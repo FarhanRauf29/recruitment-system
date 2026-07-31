@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('pelamar_tahapan', function (Blueprint $table) {
             $table->enum('spk_status', ['pending', 'proses', 'approved', 'rejected', 'offering', 'hired', 'hired_completed', 'onboarding_completed'])->default('pending');
             $table->decimal('nilai_akhir_spk', 10, 4)->nullable();
-            $table->string('metode_terbaik')->nullable();
+            $table->string('metode_terbaik', 50)->nullable();
             $table->text('catatan_spk')->nullable();
             $table->datetime('tanggal_approval')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');

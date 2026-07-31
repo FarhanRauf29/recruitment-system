@@ -11,12 +11,12 @@ return new class extends Migration
         Schema::create('riwayat_pendidikans', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pelamar_id');
-            $table->string('tingkat');
-            $table->string('nama_instansi');
-            $table->string('jurusan')->nullable();
-            $table->string('tahun_masuk')->nullable();
-            $table->string('tahun_lulus');
-            $table->string('nilai')->nullable();
+            $table->string('tingkat', 30);
+            $table->string('nama_instansi', 150);
+            $table->string('jurusan', 100)->nullable();
+            $table->string('tahun_masuk', 4)->nullable();
+            $table->string('tahun_lulus', 4);
+            $table->string('nilai', 10)->nullable();
             $table->timestamps();
             $table->foreign('pelamar_id')->references('id')->on('pelamar')->onDelete('cascade');
         });

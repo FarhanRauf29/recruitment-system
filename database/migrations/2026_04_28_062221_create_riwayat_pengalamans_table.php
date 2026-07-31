@@ -11,11 +11,11 @@ return new class extends Migration
         Schema::create('riwayat_pengalamans', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pelamar_id');
-            $table->string('perusahaan');
-            $table->string('jabatan');
-            $table->string('lokasi')->nullable();
-            $table->string('tahun_masuk');
-            $table->string('tahun_keluar')->nullable();
+            $table->string('perusahaan', 150);
+            $table->string('jabatan', 100);
+            $table->string('lokasi', 100)->nullable();
+            $table->string('tahun_masuk', 4);
+            $table->string('tahun_keluar', 4)->nullable();
             $table->boolean('is_current')->default(false);
             $table->text('deskripsi')->nullable();
             $table->timestamps();

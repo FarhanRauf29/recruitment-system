@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('riwayat_magangs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pelamar_id');
-            $table->string('perusahaan');
-            $table->string('posisi');
-            $table->string('lokasi')->nullable();
-            $table->string('durasi');
+            $table->string('perusahaan', 150);
+            $table->string('posisi', 100);
+            $table->string('lokasi', 100)->nullable();
+            $table->string('durasi', 20);
             $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_selesai')->nullable();
             $table->text('deskripsi')->nullable();

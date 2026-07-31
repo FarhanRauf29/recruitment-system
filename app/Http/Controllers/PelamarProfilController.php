@@ -120,16 +120,26 @@ class PelamarProfilController extends Controller
             'desa_kelurahan' => 'nullable|string|max:100',
             'alamat_domisili' => 'nullable|string',
             'pendidikan_terakhir' => 'nullable|string',
-            'jurusan' => 'nullable|string|max:255',
-            'instansi' => 'nullable|string|max:255',
             'gaji_diharapkan' => 'nullable|string|max:255',
         ];
 
         $request->validate($rules);
 
-        $data = $request->all();
-        $data['jurusan'] = $request->input('jurusan');
-        $data['instansi'] = $request->input('instansi');
+        $data = $request->except(['instansi', 'jurusan']);
+
+        $instansiData = $request->input('instansi');
+        if (is_array($instansiData)) {
+            $data['instansi'] = collect($instansiData)->filter()->first();
+        } else {
+            $data['instansi'] = $instansiData;
+        }
+
+        $jurusanData = $request->input('jurusan');
+        if (is_array($jurusanData)) {
+            $data['jurusan'] = collect($jurusanData)->filter()->first();
+        } else {
+            $data['jurusan'] = $jurusanData;
+        }
 
         $pelamar->update($data);
 
@@ -422,8 +432,6 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'tingkat' => 'required|string',
-            'nama_instansi' => 'required|string|max:255',
-            'jurusan' => 'nullable|string|max:255',
             'tahun_masuk' => 'nullable|string|max:4',
             'tahun_lulus' => 'required|string|max:4',
             'nilai' => 'nullable|string|max:10',
@@ -431,11 +439,27 @@ class PelamarProfilController extends Controller
 
         $pelamar = Pelamar::where('user_id', Auth::id())->first();
 
+        $instansi = $request->input('nama_instansi');
+        if (is_array($instansi)) {
+            $instansi = collect($instansi)->filter()->first();
+        }
+        if (empty($instansi) || $instansi === '-- Pilih Instansi --') {
+            $instansi = '-';
+        }
+
+        $jurusan = $request->input('jurusan');
+        if (is_array($jurusan)) {
+            $jurusan = collect($jurusan)->filter()->first();
+        }
+        if (empty($jurusan) || $jurusan === '-- Pilih Jurusan --') {
+            $jurusan = null;
+        }
+
         RiwayatPendidikan::create([
             'pelamar_id' => $pelamar->id,
             'tingkat' => $request->tingkat,
-            'nama_instansi' => $request->nama_instansi,
-            'jurusan' => $request->jurusan,
+            'nama_instansi' => $instansi,
+            'jurusan' => $jurusan,
             'tahun_masuk' => $request->tahun_masuk,
             'tahun_lulus' => $request->tahun_lulus,
             'nilai' => $request->nilai,
@@ -456,18 +480,33 @@ class PelamarProfilController extends Controller
     {
         $request->validate([
             'tingkat' => 'required|string',
-            'nama_instansi' => 'required|string|max:255',
-            'jurusan' => 'nullable|string|max:255',
             'tahun_masuk' => 'nullable|string|max:4',
             'tahun_lulus' => 'required|string|max:4',
             'nilai' => 'nullable|string|max:10',
         ]);
 
         $pendidikan = RiwayatPendidikan::findOrFail($id);
+
+        $instansi = $request->input('nama_instansi');
+        if (is_array($instansi)) {
+            $instansi = collect($instansi)->filter()->first();
+        }
+        if (empty($instansi) || $instansi === '-- Pilih Instansi --') {
+            $instansi = '-';
+        }
+
+        $jurusan = $request->input('jurusan');
+        if (is_array($jurusan)) {
+            $jurusan = collect($jurusan)->filter()->first();
+        }
+        if (empty($jurusan) || $jurusan === '-- Pilih Jurusan --') {
+            $jurusan = null;
+        }
+
         $pendidikan->update([
             'tingkat' => $request->tingkat,
-            'nama_instansi' => $request->nama_instansi,
-            'jurusan' => $request->jurusan,
+            'nama_instansi' => $instansi,
+            'jurusan' => $jurusan,
             'tahun_masuk' => $request->tahun_masuk,
             'tahun_lulus' => $request->tahun_lulus,
             'nilai' => $request->nilai,

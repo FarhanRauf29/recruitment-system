@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('riwayat_keahlians', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pelamar_id');
-            $table->string('nama_keahlian');
-            $table->string('tingkat')->nullable();
-            $table->string('sertifikat')->nullable();
+            $table->string('nama_keahlian', 100);
+            $table->string('tingkat', 30)->nullable();
+            $table->string('sertifikat', 255)->nullable();
             $table->timestamps();
             $table->foreign('pelamar_id')->references('id')->on('pelamar')->onDelete('cascade');
         });

@@ -12,11 +12,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pelamar_id')->constrained('pelamar')->onDelete('cascade');
             $table->foreignId('lowongan_id')->constrained('lowongan')->onDelete('cascade');
-            $table->string('posisi');
+            $table->string('posisi', 100);
             $table->decimal('gaji', 15, 2);
             $table->decimal('gaji_counter', 15, 2)->nullable();
             $table->enum('tipe_kontrak', ['tetap', 'kontrak', 'probation'])->default('kontrak');
-            $table->string('durasi_kontrak')->nullable();
+            $table->string('durasi_kontrak', 50)->nullable();
             $table->integer('masa_probation')->default(3);
             $table->date('tanggal_mulai_kerja');
             $table->text('catatan_hr')->nullable();

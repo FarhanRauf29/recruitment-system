@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('riwayat_bahasas', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pelamar_id');
-            $table->string('nama_bahasa');
+            $table->string('nama_bahasa', 50);
             $table->enum('tingkat', ['Pasif', 'Aktif', 'Lancar', 'Native']);
-            $table->string('sertifikat')->nullable();
+            $table->string('sertifikat', 255)->nullable();
             $table->timestamps();
             $table->foreign('pelamar_id')->references('id')->on('pelamar')->onDelete('cascade');
         });

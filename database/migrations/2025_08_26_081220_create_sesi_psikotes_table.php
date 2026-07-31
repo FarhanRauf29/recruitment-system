@@ -33,7 +33,7 @@ return new class extends Migration
             $table->boolean('selesai')->default(false);
             $table->json('soal_terpilih')->nullable();
             $table->json('jawaban_terisi')->nullable();
-            $table->string('token_sesi', 100)->unique();
+            $table->string('token_sesi', 50)->unique();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->integer('jumlah_soal_ditampilkan')->default(0);

@@ -409,25 +409,50 @@
                     </div>
 
                     <div class="tab-pane fade" id="keahlian">
-                        <div class="d-flex flex-wrap gap-2">
-                            @forelse($keahlian as $item)
-                                <div class="skill-badge">
-                                    <i class="fas fa-check-circle text-success me-1"></i>
-                                    {{ $item->nama_keahlian }}
-                                    @if ($item->tingkat)
-                                        <span class="skill-level">{{ $item->tingkat }}</span>
-                                    @endif
-                                    @if ($item->sertifikat)
-                                        <a href="{{ Storage::url($item->sertifikat) }}" target="_blank"
-                                            class="text-primary ms-1"><i class="fas fa-file-alt"></i></a>
-                                    @endif
-                                </div>
-                            @empty
-                                <div class="text-center py-5 w-100">
-                                    <i class="fas fa-code fa-3x text-muted mb-3 d-block"></i>
-                                    <p class="text-muted mb-0">Belum ada data keahlian</p>
-                                </div>
-                            @endforelse
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Keahlian</th>
+                                        <th>Tingkat</th>
+                                        <th>Sertifikat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($keahlian as $key => $item)
+                                        <tr>
+                                            <td class="text-center">{{ $key + 1 }}</td>
+                                            <td><span class="fw-semibold">{{ $item->nama_keahlian }}</span></td>
+                                            <td>
+                                                @if ($item->tingkat)
+                                                    <span
+                                                        class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">{{ $item->tingkat }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($item->sertifikat)
+                                                    <a href="{{ Storage::url($item->sertifikat) }}" target="_blank"
+                                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1">
+                                                        <i class="fas fa-download me-1"></i>Lihat
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center py-5">
+                                                <i class="fas fa-code fa-3x text-muted mb-3 d-block"></i>
+                                                <p class="text-muted mb-0">Belum ada data keahlian</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -541,26 +566,6 @@
             font-size: 0.8rem;
             color: #1e293b;
             font-weight: 600;
-        }
-
-        .skill-badge {
-            background: #f1f5f9;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            color: #1e293b;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .skill-level {
-            background: #e2e8f0;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            color: #475569;
-            margin-left: 5px;
         }
 
         .table {

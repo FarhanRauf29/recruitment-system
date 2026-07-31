@@ -204,7 +204,7 @@
                                             <label class="form-label fw-semibold">Nama Instansi</label>
                                             <div class="input-icon">
                                                 <i class="fas fa-university text-primary"></i>
-                                                <select name="instansi" id="instansi_select_pelamar"
+                                                <select name="instansi[]" id="instansi_select_pelamar"
                                                     class="form-select rounded-3" style="padding-left: 36px;">
                                                     <option value="">-- Pilih Instansi --</option>
                                                     @foreach ($instansiOptions as $value => $label)
@@ -214,7 +214,7 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                <input type="text" name="instansi" id="instansi_input_pelamar"
+                                                <input type="text" name="instansi[]" id="instansi_input_pelamar"
                                                     class="form-control rounded-3"
                                                     style="display: none; padding-left: 36px;"
                                                     placeholder="Masukkan nama instansi"
@@ -225,7 +225,7 @@
                                             <label class="form-label fw-semibold">Jurusan</label>
                                             <div class="input-icon">
                                                 <i class="fas fa-graduation-cap text-primary"></i>
-                                                <select name="jurusan" id="jurusan_select_pelamar"
+                                                <select name="jurusan[]" id="jurusan_select_pelamar"
                                                     class="form-select rounded-3" style="padding-left: 36px;">
                                                     <option value="">-- Pilih Jurusan --</option>
                                                     @foreach ($jurusanOptions as $value => $label)
@@ -235,7 +235,7 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                <input type="text" name="jurusan" id="jurusan_input_pelamar"
+                                                <input type="text" name="jurusan[]" id="jurusan_input_pelamar"
                                                     class="form-control rounded-3"
                                                     style="display: none; padding-left: 36px;"
                                                     placeholder="Masukkan nama jurusan"
@@ -297,7 +297,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small text-muted">Nama Instansi</label>
-                                                    <select name="nama_instansi" id="instansi_select_pendidikan"
+                                                    <select name="nama_instansi[]" id="instansi_select_pendidikan"
                                                         class="form-select rounded-3">
                                                         <option value="">-- Pilih Instansi --</option>
                                                         @foreach ($instansiOptions as $value => $label)
@@ -305,13 +305,13 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    <input type="text" name="nama_instansi"
+                                                    <input type="text" name="nama_instansi[]"
                                                         id="instansi_input_pendidikan" class="form-control rounded-3"
                                                         style="display: none;" placeholder="Masukkan nama instansi">
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label class="form-label small text-muted">Jurusan</label>
-                                                    <select name="jurusan" id="jurusan_select_pendidikan"
+                                                    <select name="jurusan[]" id="jurusan_select_pendidikan"
                                                         class="form-select rounded-3">
                                                         <option value="">-- Pilih Jurusan --</option>
                                                         @foreach ($jurusanOptions as $value => $label)
@@ -319,7 +319,7 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    <input type="text" name="jurusan" id="jurusan_input_pendidikan"
+                                                    <input type="text" name="jurusan[]" id="jurusan_input_pendidikan"
                                                         class="form-control rounded-3" style="display: none;"
                                                         placeholder="Masukkan nama jurusan">
                                                 </div>
@@ -559,7 +559,7 @@
                                                 <th class="px-3 py-2">Organisasi</th>
                                                 <th class="px-3 py-2">Jabatan</th>
                                                 <th class="px-3 py-2">Tahun</th>
-                                                <th class="text-center px-3 py-2" style="width: 80px">Aksi</th>
+                                                <th class="text-center px-3 py-2" style="width: 120px">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -569,15 +569,25 @@
                                                     <td class="px-3 py-2">{{ $item->jabatan }}</td>
                                                     <td class="px-3 py-2">{{ $item->tahun }}</td>
                                                     <td class="text-center px-3 py-2">
-                                                        <form
-                                                            action="{{ route('pelamar.profil.organisasi.destroy', $item->id) }}"
-                                                            method="POST" class="d-inline"
-                                                            onsubmit="return stayOnTab('organisasi')">@csrf
-                                                            @method('DELETE')<button
-                                                                class="btn btn-sm btn-danger rounded-pill"
-                                                                onclick="return confirm('Hapus data ini?')"
-                                                                title="Hapus"><i class="fas fa-trash"></i></button>
-                                                        </form>
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            <button class="btn btn-sm btn-warning rounded-pill"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editOrganisasiModal{{ $item->id }}"
+                                                                title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <form
+                                                                action="{{ route('pelamar.profil.organisasi.destroy', $item->id) }}"
+                                                                method="POST" class="d-inline"
+                                                                onsubmit="return stayOnTab('organisasi')">
+                                                                @csrf @method('DELETE')
+                                                                <button class="btn btn-sm btn-danger rounded-pill"
+                                                                    onclick="return confirm('Hapus data ini?')"
+                                                                    title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @empty
@@ -589,6 +599,56 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                @foreach ($organisasi as $item)
+                                    <div class="modal fade" id="editOrganisasiModal{{ $item->id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4">
+                                                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit
+                                                        Organisasi</h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('pelamar.profil.organisasi.update', $item->id) }}"
+                                                    method="POST" onsubmit="return stayOnTab('organisasi')">
+                                                    @csrf @method('PUT')
+                                                    <div class="modal-body p-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Nama Organisasi</label>
+                                                            <input type="text" name="nama_organisasi"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->nama_organisasi }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Jabatan</label>
+                                                            <input type="text" name="jabatan"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->jabatan }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Tahun</label>
+                                                            <input type="text" name="tahun"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->tahun }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Deskripsi</label>
+                                                            <textarea name="deskripsi" class="form-control rounded-3" rows="3">{{ $item->deskripsi }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pb-4 px-4">
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary rounded-pill px-4"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary rounded-pill px-4">Simpan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
                             <!-- 4. MAGANG/PKL -->
@@ -649,7 +709,7 @@
                                                 <th class="px-3 py-2">Posisi</th>
                                                 <th class="px-3 py-2">Durasi</th>
                                                 <th class="px-3 py-2">Lokasi</th>
-                                                <th class="text-center px-3 py-2" style="width: 80px">Aksi</th>
+                                                <th class="text-center px-3 py-2" style="width: 120px">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -660,15 +720,25 @@
                                                     <td class="px-3 py-2">{{ $item->durasi }} bulan</td>
                                                     <td class="px-3 py-2">{{ $item->lokasi ?? '-' }}</td>
                                                     <td class="text-center px-3 py-2">
-                                                        <form
-                                                            action="{{ route('pelamar.profil.magang.destroy', $item->id) }}"
-                                                            method="POST" class="d-inline"
-                                                            onsubmit="return stayOnTab('magang')">@csrf
-                                                            @method('DELETE')<button
-                                                                class="btn btn-sm btn-danger rounded-pill"
-                                                                onclick="return confirm('Hapus data ini?')"
-                                                                title="Hapus"><i class="fas fa-trash"></i></button>
-                                                        </form>
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            <button class="btn btn-sm btn-warning rounded-pill"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editMagangModal{{ $item->id }}"
+                                                                title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <form
+                                                                action="{{ route('pelamar.profil.magang.destroy', $item->id) }}"
+                                                                method="POST" class="d-inline"
+                                                                onsubmit="return stayOnTab('magang')">
+                                                                @csrf @method('DELETE')
+                                                                <button class="btn btn-sm btn-danger rounded-pill"
+                                                                    onclick="return confirm('Hapus data ini?')"
+                                                                    title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @empty
@@ -680,6 +750,77 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                @foreach ($magang as $item)
+                                    <div class="modal fade" id="editMagangModal{{ $item->id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4">
+                                                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit
+                                                        Magang/PKL</h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('pelamar.profil.magang.update', $item->id) }}"
+                                                    method="POST" onsubmit="return stayOnTab('magang')">
+                                                    @csrf @method('PUT')
+                                                    <div class="modal-body p-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Perusahaan</label>
+                                                            <input type="text" name="perusahaan"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->perusahaan }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Posisi</label>
+                                                            <input type="text" name="posisi"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->posisi }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Durasi (bulan)</label>
+                                                            <input type="text" name="durasi"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->durasi }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Lokasi</label>
+                                                            <input type="text" name="lokasi"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->lokasi }}">
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label fw-semibold">Tanggal Mulai</label>
+                                                                <input type="date" name="tanggal_mulai"
+                                                                    class="form-control rounded-3"
+                                                                    value="{{ $item->tanggal_mulai }}">
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label fw-semibold">Tanggal
+                                                                    Selesai</label>
+                                                                <input type="date" name="tanggal_selesai"
+                                                                    class="form-control rounded-3"
+                                                                    value="{{ $item->tanggal_selesai }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Deskripsi</label>
+                                                            <textarea name="deskripsi" class="form-control rounded-3" rows="3">{{ $item->deskripsi }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pb-4 px-4">
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary rounded-pill px-4"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary rounded-pill px-4">Simpan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
                             <!-- 5. PENGALAMAN KERJA -->
@@ -744,7 +885,7 @@
                                                 <th class="px-3 py-2">Jabatan</th>
                                                 <th class="px-3 py-2">Tahun</th>
                                                 <th class="px-3 py-2">Lokasi</th>
-                                                <th class="text-center px-3 py-2" style="width: 80px">Aksi</th>
+                                                <th class="text-center px-3 py-2" style="width: 120px">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -756,15 +897,25 @@
                                                         {{ $item->is_current ? 'Sekarang' : $item->tahun_keluar }}</td>
                                                     <td class="px-3 py-2">{{ $item->lokasi ?? '-' }}</td>
                                                     <td class="text-center px-3 py-2">
-                                                        <form
-                                                            action="{{ route('pelamar.profil.pengalaman.destroy', $item->id) }}"
-                                                            method="POST" class="d-inline"
-                                                            onsubmit="return stayOnTab('pengalaman')">@csrf
-                                                            @method('DELETE')<button
-                                                                class="btn btn-sm btn-danger rounded-pill"
-                                                                onclick="return confirm('Hapus data ini?')"
-                                                                title="Hapus"><i class="fas fa-trash"></i></button>
-                                                        </form>
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            <button class="btn btn-sm btn-warning rounded-pill"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editPengalamanModal{{ $item->id }}"
+                                                                title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <form
+                                                                action="{{ route('pelamar.profil.pengalaman.destroy', $item->id) }}"
+                                                                method="POST" class="d-inline"
+                                                                onsubmit="return stayOnTab('pengalaman')">
+                                                                @csrf @method('DELETE')
+                                                                <button class="btn btn-sm btn-danger rounded-pill"
+                                                                    onclick="return confirm('Hapus data ini?')"
+                                                                    title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @empty
@@ -776,6 +927,85 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                @foreach ($pengalaman as $item)
+                                    <div class="modal fade" id="editPengalamanModal{{ $item->id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4">
+                                                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit
+                                                        Pengalaman Kerja</h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('pelamar.profil.pengalaman.update', $item->id) }}"
+                                                    method="POST" onsubmit="return stayOnTab('pengalaman')">
+                                                    @csrf @method('PUT')
+                                                    <div class="modal-body p-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Perusahaan</label>
+                                                            <input type="text" name="perusahaan"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->perusahaan }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Jabatan</label>
+                                                            <input type="text" name="jabatan"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->jabatan }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Lokasi</label>
+                                                            <input type="text" name="lokasi"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->lokasi }}">
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label fw-semibold">Tahun Masuk</label>
+                                                                <input type="text" name="tahun_masuk"
+                                                                    class="form-control rounded-3"
+                                                                    value="{{ $item->tahun_masuk }}" required>
+                                                            </div>
+                                                            <div class="col-md-6 mb-3">
+                                                                <label class="form-label fw-semibold">Tahun Keluar</label>
+                                                                <input type="text" name="tahun_keluar"
+                                                                    class="form-control rounded-3"
+                                                                    value="{{ $item->tahun_keluar }}"
+                                                                    {{ $item->is_current ? 'disabled' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" name="is_current"
+                                                                    class="form-check-input"
+                                                                    id="is_current_edit{{ $item->id }}"
+                                                                    value="1"
+                                                                    {{ $item->is_current ? 'checked' : '' }}
+                                                                    onchange="toggleTahunKeluar(this, {{ $item->id }})">
+                                                                <label class="form-check-label"
+                                                                    for="is_current_edit{{ $item->id }}">
+                                                                    Masih bekerja di sini
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Deskripsi</label>
+                                                            <textarea name="deskripsi" class="form-control rounded-3" rows="3">{{ $item->deskripsi }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pb-4 px-4">
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary rounded-pill px-4"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary rounded-pill px-4">Simpan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
                             <!-- 6. BAHASA -->
@@ -828,7 +1058,7 @@
                                                 <th class="px-3 py-2">Bahasa</th>
                                                 <th class="px-3 py-2">Tingkat</th>
                                                 <th class="px-3 py-2">Sertifikat</th>
-                                                <th class="text-center px-3 py-2" style="width: 80px">Aksi</th>
+                                                <th class="text-center px-3 py-2" style="width: 120px">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -848,15 +1078,25 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-center px-3 py-2">
-                                                        <form
-                                                            action="{{ route('pelamar.profil.bahasa.destroy', $item->id) }}"
-                                                            method="POST" class="d-inline"
-                                                            onsubmit="return stayOnTab('bahasa')">@csrf
-                                                            @method('DELETE')<button
-                                                                class="btn btn-sm btn-danger rounded-pill"
-                                                                onclick="return confirm('Hapus data ini?')"
-                                                                title="Hapus"><i class="fas fa-trash"></i></button>
-                                                        </form>
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            <button class="btn btn-sm btn-warning rounded-pill"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editBahasaModal{{ $item->id }}"
+                                                                title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <form
+                                                                action="{{ route('pelamar.profil.bahasa.destroy', $item->id) }}"
+                                                                method="POST" class="d-inline"
+                                                                onsubmit="return stayOnTab('bahasa')">
+                                                                @csrf @method('DELETE')
+                                                                <button class="btn btn-sm btn-danger rounded-pill"
+                                                                    onclick="return confirm('Hapus data ini?')"
+                                                                    title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @empty
@@ -868,6 +1108,78 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                @foreach ($bahasa as $item)
+                                    <div class="modal fade" id="editBahasaModal{{ $item->id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4">
+                                                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Bahasa
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('pelamar.profil.bahasa.update', $item->id) }}"
+                                                    method="POST" enctype="multipart/form-data"
+                                                    onsubmit="return stayOnTab('bahasa')">
+                                                    @csrf @method('PUT')
+                                                    <div class="modal-body p-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Nama Bahasa</label>
+                                                            <select name="nama_bahasa" class="form-select rounded-3"
+                                                                required>
+                                                                @foreach ($bahasaOptions as $value => $label)
+                                                                    <option value="{{ $value }}"
+                                                                        {{ $item->nama_bahasa == $value ? 'selected' : '' }}>
+                                                                        {{ $label }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Tingkat</label>
+                                                            <select name="tingkat" class="form-select rounded-3" required>
+                                                                <option value="Pasif"
+                                                                    {{ $item->tingkat == 'Pasif' ? 'selected' : '' }}>
+                                                                    Pasif</option>
+                                                                <option value="Aktif"
+                                                                    {{ $item->tingkat == 'Aktif' ? 'selected' : '' }}>
+                                                                    Aktif</option>
+                                                                <option value="Lancar"
+                                                                    {{ $item->tingkat == 'Lancar' ? 'selected' : '' }}>
+                                                                    Lancar</option>
+                                                                <option value="Native"
+                                                                    {{ $item->tingkat == 'Native' ? 'selected' : '' }}>
+                                                                    Native</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Sertifikat</label>
+                                                            @if ($item->sertifikat)
+                                                                <div class="mb-2">
+                                                                    <a href="{{ Storage::url($item->sertifikat) }}"
+                                                                        target="_blank"
+                                                                        class="btn btn-sm btn-outline-primary">Lihat
+                                                                        Sertifikat</a>
+                                                                </div>
+                                                            @endif
+                                                            <input type="file" name="sertifikat_file"
+                                                                class="form-control rounded-3"
+                                                                accept=".pdf,.jpg,.jpeg,.png">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pb-4 px-4">
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary rounded-pill px-4"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary rounded-pill px-4">Simpan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
                             <!-- 7. KEAHLIAN -->
@@ -888,14 +1200,17 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label class="form-label small text-muted">Tingkat</label>
-                                                    <input type="text" name="tingkat" class="form-control rounded-3"
-                                                        placeholder="Pemula/Mahir">
+                                                    <select name="tingkat" class="form-select rounded-3">
+                                                        <option value="Dasar">Dasar</option>
+                                                        <option value="Menengah">Menengah</option>
+                                                        <option value="Mahir">Mahir</option>
+                                                        <option value="Lanjut">Lanjut</option>
+                                                    </select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small text-muted">Sertifikat</label>
                                                     <input type="file" name="sertifikat_file"
                                                         class="form-control rounded-3" accept=".pdf,.jpg,.jpeg,.png">
-
                                                 </div>
                                                 <div class="col-md-3">
                                                     <button type="submit" class="btn btn-primary rounded-3 w-100"><i
@@ -905,36 +1220,140 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @forelse($keahlian as $item)
-                                        <div class="card bg-light border-0 rounded-3">
-                                            <div class="card-body py-2 px-3">
-                                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                    <i class="fas fa-check-circle text-success"></i>
-                                                    <span class="fw-semibold">{{ $item->nama_keahlian }}</span>
-                                                    @if ($item->tingkat)
-                                                        <span
-                                                            class="badge bg-secondary rounded-pill">{{ $item->tingkat }}</span>
-                                                    @endif
-                                                    @if ($item->sertifikat)
-                                                        <a href="{{ Storage::url($item->sertifikat) }}" target="_blank"
-                                                            class="btn btn-sm btn-outline-primary rounded-pill"><i
-                                                                class="fas fa-file-alt"></i></a>
-                                                    @endif
-                                                    <form
-                                                        action="{{ route('pelamar.profil.keahlian.destroy', $item->id) }}"
-                                                        method="POST" class="d-inline"
-                                                        onsubmit="return stayOnTab('keahlian')">@csrf
-                                                        @method('DELETE')<button class="btn btn-sm btn-danger rounded-pill"
-                                                            onclick="return confirm('Hapus keahlian ini?')"
-                                                            title="Hapus"><i class="fas fa-trash"></i></button></form>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="px-3 py-2">Keahlian</th>
+                                                <th class="px-3 py-2">Tingkat</th>
+                                                <th class="px-3 py-2">Sertifikat</th>
+                                                <th class="text-center px-3 py-2" style="width: 120px">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($keahlian as $item)
+                                                <tr>
+                                                    <td class="px-3 py-2">{{ $item->nama_keahlian }}</td>
+                                                    <td class="px-3 py-2">
+                                                        @if ($item->tingkat)
+                                                            <span
+                                                                class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">{{ $item->tingkat }}</span>
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-3 py-2">
+                                                        @if ($item->sertifikat)
+                                                            <a href="{{ Storage::url($item->sertifikat) }}"
+                                                                target="_blank"
+                                                                class="btn btn-sm btn-outline-primary rounded-pill">
+                                                                <i class="fas fa-download me-1"></i>Lihat
+                                                            </a>
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center px-3 py-2">
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            <button class="btn btn-sm btn-warning rounded-pill"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editKeahlianModal{{ $item->id }}"
+                                                                title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <form
+                                                                action="{{ route('pelamar.profil.keahlian.destroy', $item->id) }}"
+                                                                method="POST" class="d-inline"
+                                                                onsubmit="return stayOnTab('keahlian')">
+                                                                @csrf @method('DELETE')
+                                                                <button class="btn btn-sm btn-danger rounded-pill"
+                                                                    onclick="return confirm('Hapus keahlian ini?')"
+                                                                    title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada
+                                                        data
+                                                        keahlian</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @foreach ($keahlian as $item)
+                                    <div class="modal fade" id="editKeahlianModal{{ $item->id }}"
+                                        tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4">
+                                                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                                                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit
+                                                        Keahlian
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
                                                 </div>
+                                                <form action="{{ route('pelamar.profil.keahlian.update', $item->id) }}"
+                                                    method="POST" enctype="multipart/form-data"
+                                                    onsubmit="return stayOnTab('keahlian')">
+                                                    @csrf @method('PUT')
+                                                    <div class="modal-body p-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Nama Keahlian</label>
+                                                            <input type="text" name="nama_keahlian"
+                                                                class="form-control rounded-3"
+                                                                value="{{ $item->nama_keahlian }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Tingkat</label>
+                                                            <select name="tingkat" class="form-select rounded-3">
+                                                                <option value="Dasar"
+                                                                    {{ $item->tingkat == 'Dasar' ? 'selected' : '' }}>
+                                                                    Dasar</option>
+                                                                <option value="Menengah"
+                                                                    {{ $item->tingkat == 'Menengah' ? 'selected' : '' }}>
+                                                                    Menengah</option>
+                                                                <option value="Mahir"
+                                                                    {{ $item->tingkat == 'Mahir' ? 'selected' : '' }}>
+                                                                    Mahir</option>
+                                                                <option value="Lanjut"
+                                                                    {{ $item->tingkat == 'Lanjut' ? 'selected' : '' }}>
+                                                                    Lanjut</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Sertifikat</label>
+                                                            @if ($item->sertifikat)
+                                                                <div class="mb-2">
+                                                                    <a href="{{ Storage::url($item->sertifikat) }}"
+                                                                        target="_blank"
+                                                                        class="btn btn-sm btn-outline-primary">Lihat
+                                                                        Sertifikat</a>
+                                                                </div>
+                                                            @endif
+                                                            <input type="file" name="sertifikat_file"
+                                                                class="form-control rounded-3"
+                                                                accept=".pdf,.jpg,.jpeg,.png">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pb-4 px-4">
+                                                        <button type="button"
+                                                            class="btn btn-outline-secondary rounded-pill px-4"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary rounded-pill px-4">Simpan</button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
-                                    @empty
-                                        <div class="text-center text-muted py-4 w-100">Belum ada data keahlian</div>
-                                    @endforelse
-                                </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -1078,6 +1497,16 @@
             return true;
         }
 
+        function toggleTahunKeluar(checkbox, id) {
+            const tahunKeluar = document.querySelector(`#editPengalamanModal${id} input[name="tahun_keluar"]`);
+            if (tahunKeluar) {
+                tahunKeluar.disabled = checkbox.checked;
+                if (checkbox.checked) {
+                    tahunKeluar.value = '';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const savedTab = localStorage.getItem('activeTab');
             if (savedTab) {
@@ -1089,62 +1518,6 @@
                 localStorage.removeItem('activeTab');
             }
 
-            const tingkatSelect = document.getElementById('tingkat_select');
-            const instansiSelect = document.getElementById('instansi_select');
-            const instansiInput = document.getElementById('instansi_input');
-            const jurusanSelect = document.getElementById('jurusan_select');
-            const jurusanInput = document.getElementById('jurusan_input');
-
-            const tingkatDropdown = ['D3', 'D4', 'S1', 'S2'];
-
-            function toggleInstansiJurusan() {
-                const selected = tingkatSelect ? tingkatSelect.value : '';
-
-                if (tingkatDropdown.includes(selected)) {
-                    instansiSelect.style.display = 'block';
-                    instansiInput.style.display = 'none';
-                    jurusanSelect.style.display = 'block';
-                    jurusanInput.style.display = 'none';
-
-                    instansiSelect.setAttribute('required', 'required');
-                    instansiInput.removeAttribute('required');
-                    jurusanSelect.removeAttribute('required');
-                    jurusanInput.removeAttribute('required');
-
-                    instansiInput.value = '';
-                    jurusanInput.value = '';
-                } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
-                    instansiSelect.style.display = 'none';
-                    instansiInput.style.display = 'block';
-                    jurusanSelect.style.display = 'none';
-                    jurusanInput.style.display = 'block';
-
-                    instansiSelect.removeAttribute('required');
-                    instansiInput.setAttribute('required', 'required');
-                    jurusanSelect.removeAttribute('required');
-                    jurusanInput.removeAttribute('required');
-
-                    instansiSelect.value = '';
-                    jurusanSelect.value = '';
-                } else {
-                    instansiSelect.style.display = 'block';
-                    instansiInput.style.display = 'none';
-                    jurusanSelect.style.display = 'block';
-                    jurusanInput.style.display = 'none';
-
-                    instansiSelect.removeAttribute('required');
-                    instansiInput.removeAttribute('required');
-                    jurusanSelect.removeAttribute('required');
-                    jurusanInput.removeAttribute('required');
-                }
-            }
-
-            if (tingkatSelect) {
-                tingkatSelect.addEventListener('change', toggleInstansiJurusan);
-                toggleInstansiJurusan();
-            }
-
-            // Toggle untuk form tambah pendidikan
             const tingkatSelectPendidikan = document.getElementById('tingkat_select_pendidikan');
             const instansiSelectPendidikan = document.getElementById('instansi_select_pendidikan');
             const instansiInputPendidikan = document.getElementById('instansi_input_pendidikan');
@@ -1164,8 +1537,10 @@
 
                     instansiSelectPendidikan.setAttribute('required', 'required');
                     instansiInputPendidikan.removeAttribute('required');
+                    instansiInputPendidikan.disabled = true;
                     jurusanSelectPendidikan.removeAttribute('required');
                     jurusanInputPendidikan.removeAttribute('required');
+                    jurusanInputPendidikan.disabled = true;
 
                     instansiInputPendidikan.value = '';
                     jurusanInputPendidikan.value = '';
@@ -1177,8 +1552,10 @@
 
                     instansiSelectPendidikan.removeAttribute('required');
                     instansiInputPendidikan.setAttribute('required', 'required');
+                    instansiInputPendidikan.disabled = false;
                     jurusanSelectPendidikan.removeAttribute('required');
                     jurusanInputPendidikan.removeAttribute('required');
+                    jurusanInputPendidikan.disabled = false;
 
                     instansiSelectPendidikan.value = '';
                     jurusanSelectPendidikan.value = '';
@@ -1190,8 +1567,10 @@
 
                     instansiSelectPendidikan.removeAttribute('required');
                     instansiInputPendidikan.removeAttribute('required');
+                    instansiInputPendidikan.disabled = true;
                     jurusanSelectPendidikan.removeAttribute('required');
                     jurusanInputPendidikan.removeAttribute('required');
+                    jurusanInputPendidikan.disabled = true;
                 }
             }
 
@@ -1217,6 +1596,9 @@
                     jurusanSelectPelamar.style.display = 'block';
                     jurusanInputPelamar.style.display = 'none';
 
+                    instansiInputPelamar.disabled = true;
+                    jurusanInputPelamar.disabled = true;
+
                     jurusanInputPelamar.value = '';
                     instansiInputPelamar.value = '';
                 } else if (selected === 'SD' || selected === 'SMP' || selected === 'SMA/SMK') {
@@ -1225,6 +1607,9 @@
                     jurusanSelectPelamar.style.display = 'none';
                     jurusanInputPelamar.style.display = 'block';
 
+                    instansiInputPelamar.disabled = false;
+                    jurusanInputPelamar.disabled = false;
+
                     instansiSelectPelamar.value = '';
                     jurusanSelectPelamar.value = '';
                 } else {
@@ -1232,6 +1617,9 @@
                     instansiInputPelamar.style.display = 'none';
                     jurusanSelectPelamar.style.display = 'block';
                     jurusanInputPelamar.style.display = 'none';
+
+                    instansiInputPelamar.disabled = true;
+                    jurusanInputPelamar.disabled = true;
                 }
             }
 
