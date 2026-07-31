@@ -608,14 +608,15 @@
             border-radius: 3px;
         }
 
+        /* ABOUT SECTION - PERBAIKAN UKURAN CARD */
         #about {
             background: var(--gray-50);
         }
 
         .about-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
+            grid-template-columnS: 1fr 1fr;
+            gap: 60px;
             align-items: center;
         }
 
@@ -624,26 +625,60 @@
             border-radius: 24px;
             overflow: hidden;
             box-shadow: var(--shadow-xl);
+            min-height: 400px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s;
+        }
+
+        .about-img-wrap:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
         }
 
         .about-img-main {
             width: 100%;
-            height: 480px;
+            height: 400px;
             object-fit: cover;
             transition: transform 0.5s;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-            flex-direction: column;
-            gap: 12px;
+            position: relative;
         }
 
-        .about-img-main i {
-            font-size: 48px;
-            color: var(--accent-light);
+        /* GAMBAR PERUSAHAAN - MENGGUNAKAN BACKGROUND IMAGE DARI URL */
+        .about-img-main {
+            background-image: url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=600&fit=crop&crop=center');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            padding: 30px;
+        }
+
+        .about-img-main::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .about-img-overlay-text {
+            position: relative;
+            z-index: 2;
+            color: var(--white);
+        }
+
+        .about-img-overlay-text h3 {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .about-img-overlay-text p {
+            font-size: 0.85rem;
+            opacity: 0.9;
         }
 
         .about-img-wrap:hover .about-img-main {
@@ -661,6 +696,7 @@
             align-items: center;
             gap: 12px;
             box-shadow: var(--shadow-lg);
+            z-index: 3;
         }
 
         .about-badge i {
@@ -683,6 +719,25 @@
             opacity: 0.8;
         }
 
+        .about-text {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .about-text:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
         .about-text h2 {
             font-family: var(--font-heading);
             font-size: clamp(1.8rem, 3vw, 2.3rem);
@@ -701,14 +756,15 @@
             color: var(--gray-600);
             margin-bottom: 16px;
             line-height: 1.7;
+            font-size: 0.95rem;
         }
 
         .about-points {
             list-style: none;
-            margin: 32px 0 40px;
+            margin: 24px 0 32px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
         .about-points li {
@@ -716,6 +772,7 @@
             align-items: center;
             gap: 12px;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .about-points li i {
@@ -728,6 +785,7 @@
             align-items: center;
             justify-content: center;
             font-size: 12px;
+            flex-shrink: 0;
         }
 
         .btn-solid {
@@ -743,6 +801,7 @@
             align-items: center;
             gap: 10px;
             text-decoration: none;
+            align-self: flex-start;
         }
 
         .btn-solid:hover {
@@ -988,7 +1047,6 @@
             line-height: 1.6;
         }
 
-        /* EVENT CARDS - SAME SIZE AS VACANCY AND WHY CARDS */
         .event-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
@@ -1450,6 +1508,15 @@
                 gap: 40px;
             }
 
+            .about-img-main {
+                height: 300px;
+            }
+
+            .about-text {
+                padding: 28px;
+                min-height: auto;
+            }
+
             .vacancy-grid {
                 grid-template-columns: 1fr;
             }
@@ -1480,6 +1547,24 @@
                 flex-direction: column;
                 align-items: center;
             }
+
+            .about-img-overlay-text h3 {
+                font-size: 1.4rem;
+            }
+
+            .about-badge {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 18px;
+            }
+
+            .about-badge i {
+                font-size: 1.4rem;
+            }
+
+            .about-badge div span {
+                font-size: 1.2rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1489,6 +1574,14 @@
 
             .process-steps {
                 grid-template-columns: 1fr;
+            }
+
+            .about-img-main {
+                height: 250px;
+            }
+
+            .about-text {
+                padding: 20px;
             }
         }
     </style>
@@ -1584,14 +1677,16 @@
         </div>
     </div>
 
+    <!-- PERBAIKAN: Bagian Tentang Kami dengan gambar perusahaan -->
     <section id="about">
         <div class="container">
             <div class="about-grid">
                 <div class="about-img-wrap reveal">
                     <div class="about-img-main">
-                        <i class="fas fa-tree fa-3x"></i>
-                        <i class="fas fa-coconut" style="font-size: 36px; margin-top: -10px;"></i>
-                        <p style="margin-top: 16px;">Perkebunan Kelapa Hibrida<br>Terluas di Indonesia</p>
+                        <div class="about-img-overlay-text">
+                            <h3>Perkebunan Kelapa Hibrida</h3>
+                            <p>Terluas di Indonesia</p>
+                        </div>
                     </div>
                     <div class="about-badge">
                         <i class="fas fa-crown"></i>
@@ -1666,11 +1761,11 @@
                     </div>
                 @endforelse
             </div>
-            <div class="vacancy-cta reveal">
+            {{-- <div class="vacancy-cta reveal">
                 <a href="{{ route('lowongan.list') }}">
                     <button class="btn-outline-navy"><i class="fas fa-th-list"></i> Lihat Semua Lowongan</button>
                 </a>
-            </div>
+            </div> --}}
         </div>
     </section>
 
@@ -1708,7 +1803,6 @@
         </div>
     </section>
 
-    <!-- PERBAIKAN: Bagian Event dengan ukuran card yang konsisten -->
     <section id="event">
         <div class="container">
             <div class="section-header reveal">
@@ -1718,7 +1812,6 @@
                 <p>Ikuti berbagai program rekrutmen, job fair, dan kegiatan perusahaan.</p>
             </div>
             <div class="event-grid">
-                <!-- Card Event Utama - Sama ukuran dengan card lainnya -->
                 <div class="event-card reveal">
                     <div class="event-img">
                         <i class="fas fa-calendar-alt fa-3x"></i>
@@ -1733,8 +1826,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- List Event Samping -->
                 <div class="event-list">
                     <div class="event-list-item reveal reveal-delay-1">
                         <div class="event-date-box">
