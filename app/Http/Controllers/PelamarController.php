@@ -176,28 +176,28 @@ class PelamarController extends Controller
     public function update(Request $request, Pelamar $pelamar)
     {
         $request->validate([
-            'nama_depan'          => 'required|string|max:255',
-            'nama_belakang'       => 'required|string|max:255',
+            'nama_depan'          => 'required|string|max:50',
+            'nama_belakang'       => 'required|string|max:50',
             'jenis_kelamin'       => 'required|string|in:Laki-laki,Perempuan',
-            'tempat_lahir'        => 'required|string|max:255',
-            'kewarganegaraan'     => 'required|string|max:100',
+            'tempat_lahir'        => 'required|string|max:50',
+            'kewarganegaraan'     => 'required|string|max:30',
             'nomor_handphone'     => [
                 'required',
                 'string',
                 'min:11',
-                'max:13',
+                'max:15',
                 'regex:/^[0-9]+$/',
                 'starts_with:08'
             ],
-            'gaji_diharapkan'     => 'required|string|max:255',
+            'gaji_diharapkan'     => 'required|string|max:20',
             'alamat_domisili'     => 'required|string',
-            'provinsi'            => 'required|string|max:100',
+            'provinsi'            => 'required|string|max:50',
             'pendidikan_terakhir' => 'required|string|in:' . implode(',', array_keys(Pelamar::pendidikanOptions())),
-            'kab_kota'            => 'required|string|max:100',
-            'kecamatan'           => 'nullable|string|max:100',
-            'desa_kelurahan'      => 'nullable|string|max:100',
-            'jurusan'             => 'nullable|string|max:255',
-            'instansi'            => 'nullable|string|max:255',
+            'kab_kota'            => 'required|string|max:50',
+            'kecamatan'           => 'nullable|string|max:50',
+            'desa_kelurahan'      => 'nullable|string|max:50',
+            'jurusan'             => 'nullable|string|max:100',
+            'instansi'            => 'nullable|string|max:100',
             'tanggal_lahir'       => [
                 'required',
                 'date',
@@ -213,7 +213,7 @@ class PelamarController extends Controller
                 'required',
                 'string',
                 'min:11',
-                'max:13',
+                'max:15',
                 'regex:/^[0-9]+$/',
                 'starts_with:08'
             ],
@@ -359,6 +359,7 @@ class PelamarController extends Controller
                     'Desa/Kelurahan',
                     'Alamat Domisili',
                     'Pendidikan Terakhir',
+                    'instansi',
                     'Jurusan',
                     'Gaji Diharapkan'
                 ];
@@ -382,6 +383,7 @@ class PelamarController extends Controller
                     'Kuranji',
                     'Kuranji',
                     'Jl. Tui Kuranji No 27',
+                    'Politeknik Negeri Padang',
                     'D-4',
                     'Teknologi Informasi',
                     '10000000'
