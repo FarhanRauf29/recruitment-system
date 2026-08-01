@@ -60,7 +60,7 @@ class PelamarImport implements ToModel, WithHeadingRow
                 'user_id' => $user->id,
                 'nama_depan' => $row['nama_depan'] ?? '',
                 'nama_belakang' => $row['nama_belakang'] ?? '',
-                'nama_lengkap' => trim(($row['nama_depan'] ?? '') . ' ' . ($row['nama_belakang'] ?? '')),
+                'nama_lengkap' => $row['nama_lengkap'] ?? '',
                 'email' => $email,
                 'jenis_kelamin' => $row['jenis_kelamin'] ?? '',
                 'tempat_lahir' => $row['tempat_lahir'] ?? '',

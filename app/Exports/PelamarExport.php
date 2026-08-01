@@ -23,6 +23,7 @@ class PelamarExport implements FromCollection, WithHeadings, WithMapping, Should
             'Nama Belakang',
             'Nama Lengkap',
             'Email',
+            'Password Default',
             'Jenis Kelamin',
             'Tempat Lahir',
             'Tanggal Lahir',
@@ -39,7 +40,6 @@ class PelamarExport implements FromCollection, WithHeadings, WithMapping, Should
             'Instansi',
             'Jurusan',
             'Gaji Diharapkan',
-            'Tanggal Daftar'
         ];
     }
 
@@ -52,6 +52,7 @@ class PelamarExport implements FromCollection, WithHeadings, WithMapping, Should
             $pelamar->nama_belakang ?? '-',
             $pelamar->nama_lengkap ?? '-',
             $pelamar->email ?? '-',
+            $pelamar->password_default ?? '-',
             $pelamar->jenis_kelamin ?? '-',
             $pelamar->tempat_lahir ?? '-',
             $pelamar->tanggal_lahir ? $pelamar->tanggal_lahir->format('Y-m-d') : '-',
@@ -68,7 +69,6 @@ class PelamarExport implements FromCollection, WithHeadings, WithMapping, Should
             $pelamar->instansi ?? '-',
             $pelamar->jurusan ?? '-',
             $pelamar->gaji_diharapkan ?? '-',
-            $pelamar->created_at ? $pelamar->created_at->format('d/m/Y H:i') : '-',
         ];
     }
 }
