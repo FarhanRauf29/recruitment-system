@@ -68,6 +68,7 @@ class ProfileController extends Controller
                     'desa_kelurahan' => $request->desa_kelurahan,
                     'alamat_domisili' => $request->alamat_domisili,
                     'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                    'instansi' => $request->instansi,
                     'jurusan' => $request->jurusan,
                     'gaji_diharapkan' => $request->gaji_diharapkan,
                 ];
@@ -109,6 +110,7 @@ class ProfileController extends Controller
                     'desa_kelurahan' => $request->desa_kelurahan ?? '',
                     'alamat_domisili' => $request->alamat_domisili ?? '',
                     'pendidikan_terakhir' => $request->pendidikan_terakhir ?? '',
+                    'instansi' => $request->instansi ?? '',
                     'jurusan' => $request->jurusan ?? '',
                     'gaji_diharapkan' => $request->gaji_diharapkan ?? '',
                 ];

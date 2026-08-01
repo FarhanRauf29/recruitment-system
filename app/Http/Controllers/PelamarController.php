@@ -359,7 +359,7 @@ class PelamarController extends Controller
                     'Desa/Kelurahan',
                     'Alamat Domisili',
                     'Pendidikan Terakhir',
-                    'instansi',
+                    'Instansi',
                     'Jurusan',
                     'Gaji Diharapkan'
                 ];
@@ -384,7 +384,6 @@ class PelamarController extends Controller
                     'Kuranji',
                     'Jl. Tui Kuranji No 27',
                     'Politeknik Negeri Padang',
-                    'D-4',
                     'Teknologi Informasi',
                     '10000000'
                 ];

@@ -36,6 +36,7 @@ class PelamarExport implements FromCollection, WithHeadings, WithMapping, Should
             'Desa/Kelurahan',
             'Alamat Domisili',
             'Pendidikan Terakhir',
+            'Instansi',
             'Jurusan',
             'Gaji Diharapkan',
             'Tanggal Daftar'
@@ -64,6 +65,7 @@ class PelamarExport implements FromCollection, WithHeadings, WithMapping, Should
             $pelamar->desa_kelurahan ?? '-',
             $pelamar->alamat_domisili ?? '-',
             $pelamar->pendidikan_terakhir ?? '-',
+            $pelamar->instansi ?? '-',
             $pelamar->jurusan ?? '-',
             $pelamar->gaji_diharapkan ?? '-',
             $pelamar->created_at ? $pelamar->created_at->format('d/m/Y H:i') : '-',
