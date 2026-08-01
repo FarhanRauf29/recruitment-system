@@ -123,20 +123,28 @@ class HasilPsikotes extends Model
             ->first();
 
         if ($pelamarTahapan) {
-            if ($pelamarTahapan->status === 'diproses') {
-                $newStatus = $this->lulus ? 'lolos' : 'gagal';
-                $pelamarTahapan->status = $newStatus;
-                $pelamarTahapan->tanggal_selesai = now();
-                $pelamarTahapan->save();
+            $newStatus = $this->lulus ? 'lolos' : 'gagal';
+            $catatan = $this->lulus
+                ? 'Lulus psikotes dengan nilai: ' . ($this->nilai_akhir ?? 0)
+                : 'Tidak lulus psikotes dengan nilai: ' . ($this->nilai_akhir ?? 0);
 
-                if ($newStatus === 'lolos') {
-                    $this->bukaTahapanBerikutnya($pelamarTahapan);
-                } elseif ($newStatus === 'gagal') {
-                    PelamarTahapan::where('pelamar_id', $this->pelamar_id)
-                        ->where('lowongan_id', $this->lowongan_id)
-                        ->where('status', 'menunggu')
-                        ->update(['status' => 'gagal', 'catatan' => 'Proses berhenti karena gagal pada tahap psikotes', 'tanggal_selesai' => now()]);
-                }
+            $pelamarTahapan->status = $newStatus;
+            $pelamarTahapan->catatan = $catatan;
+            $pelamarTahapan->tanggal_selesai = now();
+            $pelamarTahapan->save();
+
+            if ($newStatus === 'lolos') {
+                $this->bukaTahapanBerikutnya($pelamarTahapan);
+            } elseif ($newStatus === 'gagal') {
+                PelamarTahapan::where('pelamar_id', $this->pelamar_id)
+                    ->where('lowongan_id', $this->lowongan_id)
+                    ->where('id', '!=', $pelamarTahapan->id)
+                    ->whereIn('status', ['menunggu', 'diproses'])
+                    ->update([
+                        'status' => 'gagal',
+                        'catatan' => 'Proses berhenti karena gagal pada tahap psikotes',
+                        'tanggal_selesai' => now()
+                    ]);
             }
         }
     }
@@ -145,22 +153,24 @@ class HasilPsikotes extends Model
     {
         $tahapanPsikotes = $pelamarTahapan->tahapan;
 
-        $nextTahapan = TahapanRekrutmen::where('urutan', '>', $tahapanPsikotes->urutan)
+        $subsequentTahapans = TahapanRekrutmen::where('urutan', '>', $tahapanPsikotes->urutan)
             ->orderBy('urutan', 'asc')
-            ->first();
+            ->get();
 
-        if ($nextTahapan) {
+        if ($subsequentTahapans->isNotEmpty()) {
+            $nextTahapan = $subsequentTahapans->first();
+
             $nextPelamarTahapan = PelamarTahapan::where('pelamar_id', $pelamarTahapan->pelamar_id)
                 ->where('lowongan_id', $pelamarTahapan->lowongan_id)
                 ->where('tahapan_id', $nextTahapan->id)
                 ->first();
 
             if ($nextPelamarTahapan) {
-                if ($nextPelamarTahapan->status === 'menunggu') {
-                    $nextPelamarTahapan->status = 'diproses';
-                    $nextPelamarTahapan->tanggal_mulai = now();
-                    $nextPelamarTahapan->save();
-                }
+                $nextPelamarTahapan->status = 'diproses';
+                $nextPelamarTahapan->catatan = null;
+                $nextPelamarTahapan->tanggal_mulai = now();
+                $nextPelamarTahapan->tanggal_selesai = null;
+                $nextPelamarTahapan->save();
             } else {
                 PelamarTahapan::create([
                     'pelamar_id' => $pelamarTahapan->pelamar_id,
@@ -169,6 +179,23 @@ class HasilPsikotes extends Model
                     'status' => 'diproses',
                     'tanggal_mulai' => now(),
                 ]);
+            }
+
+            $restTahapans = $subsequentTahapans->slice(1);
+            foreach ($restTahapans as $restTahapan) {
+                $restPelamarTahapan = PelamarTahapan::where('pelamar_id', $pelamarTahapan->pelamar_id)
+                    ->where('lowongan_id', $pelamarTahapan->lowongan_id)
+                    ->where('tahapan_id', $restTahapan->id)
+                    ->first();
+
+                if ($restPelamarTahapan) {
+                    if ($restPelamarTahapan->status === 'gagal' && str_contains($restPelamarTahapan->catatan ?? '', 'gagal pada tahap psikotes')) {
+                        $restPelamarTahapan->status = 'menunggu';
+                        $restPelamarTahapan->catatan = null;
+                        $restPelamarTahapan->tanggal_selesai = null;
+                        $restPelamarTahapan->save();
+                    }
+                }
             }
         }
     }

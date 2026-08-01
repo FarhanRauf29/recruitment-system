@@ -218,7 +218,8 @@ class HasilPsikotesController extends Controller
         $nilaiAkhir = $jumlahJenis > 0 ? round($nilaiAkhir / $jumlahJenis, 2) : 0;
 
         $konfigurasi = $sesi->konfigurasi;
-        $batasKelulusan = $konfigurasi ? ($konfigurasi->batas_nilai_kelulusan ?? 60) : 60;
+
+        $batasKelulusan = $konfigurasi ? ($konfigurasi->batas_nilai_kelulusan ?? 70) : 70;
         $lulus = $nilaiAkhir >= $batasKelulusan;
         $rekomendasi = $this->tentukanRekomendasi($nilaiAkhir);
 
@@ -264,7 +265,6 @@ class HasilPsikotesController extends Controller
             ]);
         }
 
-        $this->updateTahapanPelamar($sesi);
 
         return $hasil;
     }
@@ -281,27 +281,5 @@ class HasilPsikotesController extends Controller
         if ($nilai >= 70) return 'cukup';
         if ($nilai >= 60) return 'kurang';
         return 'tidak_lulus';
-    }
-
-    private function updateTahapanPelamar($sesi)
-    {
-        $hasil = HasilPsikotes::where('sesi_psikotes_id', $sesi->id)->first();
-        $tahapan = PelamarTahapan::find($sesi->pelamar_tahapan_id);
-
-        if ($hasil && $tahapan) {
-            if ($hasil->lulus) {
-                $tahapan->update([
-                    'status' => 'lolos',
-                    'tanggal_selesai' => now(),
-                    'catatan' => 'Lulus psikotes dengan nilai: ' . ($hasil->nilai_akhir ?? 0)
-                ]);
-            } else {
-                $tahapan->update([
-                    'status' => 'gagal',
-                    'tanggal_selesai' => now(),
-                    'catatan' => 'Tidak lulus psikotes dengan nilai: ' . ($hasil->nilai_akhir ?? 0)
-                ]);
-            }
-        }
     }
 }

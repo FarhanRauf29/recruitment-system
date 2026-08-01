@@ -159,7 +159,7 @@
                                         <div class="input-group">
                                             <span class="input-group-text bg-white"><i
                                                     class="fas fa-map-marker-alt text-primary"></i></span>
-                                            <textarea name="alamat_lokasi" class="form-control" rows="2" placeholder="Jl. ...">{{ old('alamat_lokasi') }}</textarea>
+                                            <textarea name="alamat_lokasi" class="form-control" rows="2" placeholder="">{{ old('alamat_lokasi') }}</textarea>
                                         </div>
                                     </div>
                                 </div>

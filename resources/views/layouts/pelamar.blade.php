@@ -812,8 +812,8 @@
             href="{{ route('pelamar.lowongan.index') }}"><i class="fas fa-briefcase"></i> Lowongan</a>
         <a class="nav-link {{ request()->routeIs('pelamar.pelamartahapan.*') ? 'active' : '' }}"
             href="{{ route('pelamar.pelamartahapan.index') }}"><i class="fas fa-list-check"></i> Tahapan</a>
-        <a class="nav-link {{ request()->routeIs('pelamar.spk.hasil') ? 'active' : '' }}"
-            href="{{ route('pelamar.spk.hasil') }}"><i class="fas fa-chart-pie"></i> Hasil SPK</a>
+        {{-- <a class="nav-link {{ request()->routeIs('pelamar.spk.hasil') ? 'active' : '' }}"
+            href="{{ route('pelamar.spk.hasil') }}"><i class="fas fa-chart-pie"></i> Hasil SPK</a> --}}
         <a class="nav-link {{ request()->routeIs('pelamar.offering.*') ? 'active' : '' }}"
             href="{{ route('pelamar.offering.index') }}"><i class="fas fa-file-contract"></i> Penawaran</a>
         <a class="nav-link {{ request()->routeIs('pelamar.status.seleksi') ? 'active' : '' }}"
