@@ -106,7 +106,6 @@
                                                 {{ old('hasil_narkoba', $mcu->hasil_narkoba) == 'Negatif' ? 'selected' : '' }}>
                                                 Negatif</option>
                                         </select>
-                                        <small class="text-muted">Contoh: Narkotika, Psikotropika, Zat Adiktif</small>
                                     </div>
                                 </div>
                                 <div class="col-md-8">
