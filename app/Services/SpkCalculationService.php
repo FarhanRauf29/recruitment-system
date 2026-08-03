@@ -126,9 +126,13 @@ class SpkCalculationService
             foreach ($hasilPerhitungan as $index => $hasil) {
                 $ranking = $index + 1;
 
-                $statusRekomendasi = $ranking <= $slot
-                    ? 'rekomendasi'
-                    : 'tidak_rekomendasi';
+                if ($ranking <= $slot) {
+                    $statusRekomendasi = 'rekomendasi';
+                } elseif ($ranking <= ($slot * 2)) {
+                    $statusRekomendasi = 'cadangan';
+                } else {
+                    $statusRekomendasi = 'tidak_rekomendasi';
+                }
 
                 HasilSAW::updateOrCreate(
                     [
@@ -244,7 +248,14 @@ class SpkCalculationService
 
             foreach ($hasilPerhitungan as $index => $hasil) {
                 $ranking = $index + 1;
-                $statusRekomendasi = $ranking <= $slot ? 'rekomendasi' : 'tidak_rekomendasi';
+
+                if ($ranking <= $slot) {
+                    $statusRekomendasi = 'rekomendasi';
+                } elseif ($ranking <= ($slot * 2)) {
+                    $statusRekomendasi = 'cadangan';
+                } else {
+                    $statusRekomendasi = 'tidak_rekomendasi';
+                }
 
                 HasilTOPSIS::updateOrCreate(
                     [

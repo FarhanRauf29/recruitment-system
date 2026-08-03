@@ -572,11 +572,20 @@ class SpkRecruitmentController extends Controller
 
             foreach ($data as $index => $item) {
                 $nilai = $metode == 'saw' ? $item->nilai_saw : $item->nilai_topsis;
-                $status = $item->status_rekomendasi == 'rekomendasi' ? 'REKOMENDASI' : 'TIDAK REKOMENDASI';
-                $statusColor = $item->status_rekomendasi == 'rekomendasi' ? 'FF10B981' : 'FFEF4444';
-                $keterangan = $item->status_rekomendasi == 'rekomendasi'
-                    ? 'Direkomendasikan untuk tahap selanjutnya'
-                    : 'Tidak direkomendasikan untuk tahap selanjutnya';
+
+                if ($item->status_rekomendasi == 'rekomendasi') {
+                    $status = 'REKOMENDASI';
+                    $statusColor = 'FF10B981';
+                    $keterangan = 'Direkomendasikan utama untuk tahap selanjutnya';
+                } elseif ($item->status_rekomendasi == 'cadangan') {
+                    $status = 'CADANGAN';
+                    $statusColor = 'FFF59E0B';
+                    $keterangan = 'Kandidat cadangan tahap selanjutnya';
+                } else {
+                    $status = 'TIDAK REKOMENDASI';
+                    $statusColor = 'FFEF4444';
+                    $keterangan = 'Tidak direkomendasikan untuk tahap selanjutnya';
+                }
 
                 $sheet->setCellValue('A' . $rowNum, $index + 1);
                 $sheet->setCellValue('B' . $rowNum, $item->ranking);

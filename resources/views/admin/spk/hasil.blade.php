@@ -15,7 +15,8 @@
                                 </div>
                                 <div>
                                     <h5 class="mb-0 fw-bold">Hasil Ranking Kandidat</h5>
-                                    <p class="small mb-0 opacity-75">Lowongan: {{ $lowongan->judul_lowongan }}</p>
+                                    <p class="small mb-0 opacity-75">Lowongan: {{ $lowongan->judul_lowongan }} (Slot:
+                                        {{ $lowongan->slot }})</p>
                                 </div>
                             </div>
                             <a href="{{ route('admin.spk.penilaian', $lowongan->id) }}"
@@ -51,6 +52,7 @@
                         </ul>
 
                         <div class="tab-content">
+                            <!-- TAB SAW -->
                             <div class="tab-pane fade show active" id="saw">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
@@ -68,7 +70,9 @@
                                                 <tr>
                                                     <td class="text-center">
                                                         <span
-                                                            class="badge bg-{{ $item->ranking <= 3 ? 'success' : ($item->ranking <= 5 ? 'warning' : 'secondary') }} rounded-pill fs-6 px-3 py-2">#{{ $item->ranking }}</span>
+                                                            class="badge bg-{{ $item->ranking <= $lowongan->slot ? 'success' : ($item->ranking <= $lowongan->slot * 2 ? 'warning' : 'secondary') }} rounded-pill fs-6 px-3 py-2">
+                                                            #{{ $item->ranking }}
+                                                        </span>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex align-items-center gap-2">
@@ -86,12 +90,19 @@
                                                             class="fw-bold fs-5 text-primary">{{ number_format($item->nilai_saw, 4) }}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span
-                                                            class="badge bg-{{ $item->status_rekomendasi == 'rekomendasi' ? 'success' : 'danger' }} rounded-pill px-3 py-2">
-                                                            <i
-                                                                class="fas fa-{{ $item->status_rekomendasi == 'rekomendasi' ? 'check-circle' : 'times-circle' }} me-1"></i>
-                                                            {{ $item->status_rekomendasi == 'rekomendasi' ? 'Rekomendasi' : 'Tidak Rekomendasi' }}
-                                                        </span>
+                                                        @if ($item->status_rekomendasi == 'rekomendasi')
+                                                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                                                <i class="fas fa-check-circle me-1"></i> Rekomendasi
+                                                            </span>
+                                                        @elseif ($item->status_rekomendasi == 'cadangan')
+                                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                                <i class="fas fa-exclamation-circle me-1"></i> Cadangan
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                                <i class="fas fa-times-circle me-1"></i> Tidak Rekomendasi
+                                                            </span>
+                                                        @endif
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="d-flex gap-2 justify-content-center">
@@ -99,14 +110,14 @@
                                                                 class="btn btn-sm btn-outline-info rounded-pill px-3">
                                                                 <i class="fas fa-eye me-1"></i> Detail
                                                             </a>
-                                                            @if ($item->ranking <= 3)
+                                                            @if ($item->status_rekomendasi == 'rekomendasi' || $item->status_rekomendasi == 'cadangan')
                                                                 <form
                                                                     action="{{ route('admin.spk.approve', [$lowongan->id, $item->pelamar_id]) }}"
                                                                     method="POST" class="d-inline">
                                                                     @csrf
                                                                     <input type="hidden" name="metode" value="saw">
                                                                     <input type="hidden" name="catatan"
-                                                                        value="Lolos berdasarkan perhitungan SAW (Ranking {{ $item->ranking }})">
+                                                                        value="Lolos berdasarkan perhitungan SAW (Ranking {{ $item->ranking }} - {{ ucfirst($item->status_rekomendasi) }})">
                                                                     <button type="submit"
                                                                         class="btn btn-sm btn-success rounded-pill px-3"
                                                                         onclick="return confirm('Approve kandidat ini ke tahap offering?')">
@@ -118,74 +129,94 @@
                                                     </td>
                                                 </tr>
                                             @empty
-                                                <td>
-                                                <td colspan="5" class="text-center py-5"><i
-                                                        class="fas fa-chart-line fa-3x text-muted mb-3 d-block"></i>
-                                                    <h5 class="text-muted">Belum Ada Hasil SAW</h5>
-                                                    <p class="text-muted mb-0">Silakan hitung SAW terlebih dahulu</p>
-                                                </td>
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-5">
+                                                        <i class="fas fa-chart-line fa-3x text-muted mb-3 d-block"></i>
+                                                        <h5 class="text-muted">Belum Ada Hasil SAW</h5>
+                                                        <p class="text-muted mb-0">Silakan hitung SAW terlebih dahulu</p>
+                                                    </td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
                                     </table>
                                 </div>
                                 @if ($hasilSAW->isNotEmpty())
-                                    <div class="d-flex justify-content-end mt-3"><a
-                                            href="{{ route('admin.spk.export', [$lowongan->id, 'saw']) }}"
-                                            class="btn btn-sm btn-success rounded-pill px-4"><i
-                                                class="fas fa-download me-2"></i> Export Excel</a></div>
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <a href="{{ route('admin.spk.export', [$lowongan->id, 'saw']) }}"
+                                            class="btn btn-sm btn-success rounded-pill px-4">
+                                            <i class="fas fa-download me-2"></i> Export Excel
+                                        </a>
+                                    </div>
                                 @endif
                             </div>
 
+                            <!-- TAB TOPSIS -->
                             <div class="tab-pane fade" id="topsis">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
                                         <thead class="bg-light">
                                             <tr>
-                                                <th class="text-center">Ranking</th>
-                                                <th>Nama Pelamar</th>
-                                                <th class="text-center">Nilai TOPSIS</th>
-                                                <th class="text-center">Status</th>
-                                                <th class="text-center">Aksi</th>
+                                                <th class="text-center" style="width: 10%">Ranking</th>
+                                                <th style="width: 40%">Nama Pelamar</th>
+                                                <th class="text-center" style="width: 15%">Nilai TOPSIS</th>
+                                                <th class="text-center" style="width: 20%">Status</th>
+                                                <th class="text-center" style="width: 15%">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @forelse($hasilTOPSIS as $item)
                                                 <tr>
-                                                    <td class="text-center"><span
-                                                            class="badge bg-{{ $item->ranking <= 3 ? 'success' : ($item->ranking <= 5 ? 'warning' : 'secondary') }} rounded-pill fs-6 px-3 py-2">#{{ $item->ranking }}</span>
+                                                    <td class="text-center">
+                                                        <span
+                                                            class="badge bg-{{ $item->ranking <= $lowongan->slot ? 'success' : ($item->ranking <= $lowongan->slot * 2 ? 'warning' : 'secondary') }} rounded-pill fs-6 px-3 py-2">
+                                                            #{{ $item->ranking }}
+                                                        </span>
                                                     </td>
                                                     <td>
                                                         <div class="d-flex align-items-center gap-2">
-                                                            <div class="rounded-circle bg-primary bg-opacity-10 p-2"><i
-                                                                    class="fas fa-user text-primary"></i></div>
+                                                            <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+                                                                <i class="fas fa-user text-primary"></i>
+                                                            </div>
                                                             <div>
                                                                 <div class="fw-semibold">
                                                                     {{ $item->pelamar->nama_lengkap }}</div>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="text-center"><span
+                                                    <td class="text-center">
+                                                        <span
                                                             class="fw-bold fs-5 text-primary">{{ number_format($item->nilai_topsis, 4) }}</span>
                                                     </td>
-                                                    <td class="text-center"><span
-                                                            class="badge bg-{{ $item->status_rekomendasi == 'rekomendasi' ? 'success' : 'danger' }} rounded-pill px-3 py-2"><i
-                                                                class="fas fa-{{ $item->status_rekomendasi == 'rekomendasi' ? 'check-circle' : 'times-circle' }} me-1"></i>
-                                                            {{ $item->status_rekomendasi == 'rekomendasi' ? 'Rekomendasi' : 'Tidak Rekomendasi' }}</span>
+                                                    <td class="text-center">
+                                                        @if ($item->status_rekomendasi == 'rekomendasi')
+                                                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                                                <i class="fas fa-check-circle me-1"></i> Rekomendasi
+                                                            </span>
+                                                        @elseif ($item->status_rekomendasi == 'cadangan')
+                                                            <span
+                                                                class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                                <i class="fas fa-exclamation-circle me-1"></i> Cadangan
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                                <i class="fas fa-times-circle me-1"></i> Tidak Rekomendasi
+                                                            </span>
+                                                        @endif
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="d-flex gap-2 justify-content-center"><a
-                                                                href="{{ route('admin.spk.detail-topsis', [$lowongan->id, $item->pelamar_id]) }}"
-                                                                class="btn btn-sm btn-outline-info rounded-pill px-3"><i
-                                                                    class="fas fa-eye me-1"></i> Detail</a>
-                                                            @if ($item->ranking <= 3)
+                                                        <div class="d-flex gap-2 justify-content-center">
+                                                            <a href="{{ route('admin.spk.detail-topsis', [$lowongan->id, $item->pelamar_id]) }}"
+                                                                class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                                                <i class="fas fa-eye me-1"></i> Detail
+                                                            </a>
+                                                            @if ($item->status_rekomendasi == 'rekomendasi' || $item->status_rekomendasi == 'cadangan')
                                                                 <form
                                                                     action="{{ route('admin.spk.approve', [$lowongan->id, $item->pelamar_id]) }}"
                                                                     method="POST" class="d-inline">
                                                                     @csrf
-                                                                    <input type="hidden" name="metode" value="saw">
+                                                                    <input type="hidden" name="metode" value="topsis">
                                                                     <input type="hidden" name="catatan"
-                                                                        value="Lolos berdasarkan perhitungan SAW (Ranking {{ $item->ranking }})">
+                                                                        value="Lolos berdasarkan perhitungan TOPSIS (Ranking {{ $item->ranking }} - {{ ucfirst($item->status_rekomendasi) }})">
                                                                     <button type="submit"
                                                                         class="btn btn-sm btn-success rounded-pill px-3"
                                                                         onclick="return confirm('Approve kandidat ini ke tahap offering?')">
@@ -198,8 +229,8 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="5" class="text-center py-5"><i
-                                                            class="fas fa-chart-line fa-3x text-muted mb-3 d-block"></i>
+                                                    <td colspan="5" class="text-center py-5">
+                                                        <i class="fas fa-chart-line fa-3x text-muted mb-3 d-block"></i>
                                                         <h5 class="text-muted">Belum Ada Hasil TOPSIS</h5>
                                                         <p class="text-muted mb-0">Silakan hitung TOPSIS terlebih dahulu
                                                         </p>
@@ -210,22 +241,26 @@
                                     </table>
                                 </div>
                                 @if ($hasilTOPSIS->isNotEmpty())
-                                    <div class="d-flex justify-content-end mt-3"><a
-                                            href="{{ route('admin.spk.export', [$lowongan->id, 'topsis']) }}"
-                                            class="btn btn-sm btn-success rounded-pill px-4"><i
-                                                class="fas fa-download me-2"></i> Export Excel</a></div>
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <a href="{{ route('admin.spk.export', [$lowongan->id, 'topsis']) }}"
+                                            class="btn btn-sm btn-success rounded-pill px-4">
+                                            <i class="fas fa-download me-2"></i> Export Excel
+                                        </a>
+                                    </div>
                                 @endif
                             </div>
 
+                            <!-- TAB OFFERING -->
                             <div class="tab-pane fade" id="offering">
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
                                         <thead class="bg-light">
-                                            <th>Nama Pelamar</th>
-                                            <th class="text-center">Nilai Akhir</th>
-                                            <th class="text-center">Metode</th>
-                                            <th class="text-center">Tanggal Approval</th>
-                                            <th class="text-center">Status</th>
+                                            <tr>
+                                                <th>Nama Pelamar</th>
+                                                <th class="text-center">Nilai Akhir</th>
+                                                <th class="text-center">Metode</th>
+                                                <th class="text-center">Tanggal Approval</th>
+                                                <th class="text-center">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -234,8 +269,9 @@
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex align-items-center gap-2">
-                                                            <div class="rounded-circle bg-primary bg-opacity-10 p-2"><i
-                                                                    class="fas fa-user text-primary"></i></div>
+                                                            <div class="rounded-circle bg-primary bg-opacity-10 p-2">
+                                                                <i class="fas fa-user text-primary"></i>
+                                                            </div>
                                                             <div>
                                                                 <div class="fw-semibold">
                                                                     {{ $item->pelamar->nama_lengkap }}</div>
@@ -243,22 +279,25 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-center fw-bold text-primary">
-                                                        {{ number_format($item->nilai_akhir_spk, 4) }}</td>
-                                                    <td class="text-center"><span
+                                                        {{ number_format($item->nilai_akhir_spk, 4) }}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span
                                                             class="badge bg-info rounded-pill px-3 py-2">{{ strtoupper($item->metode_terbaik) }}</span>
                                                     </td>
                                                     <td class="text-center">
                                                         {{ \Carbon\Carbon::parse($item->tanggal_approval)->format('d/m/Y H:i') }}
                                                     </td>
-                                                    <td class="text-center"><span
-                                                            class="badge bg-success rounded-pill px-3 py-2"><i
-                                                                class="fas fa-check-circle me-1"></i> Approved
-                                                            Offering</span></td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                                            <i class="fas fa-check-circle me-1"></i> Approved Offering
+                                                        </span>
                                                     </td>
-                                                @empty
+                                                </tr>
+                                            @empty
                                                 <tr>
-                                                    <td colspan="5" class="text-center py-5"><i
-                                                            class="fas fa-briefcase fa-3x text-muted mb-3 d-block"></i>
+                                                    <td colspan="5" class="text-center py-5">
+                                                        <i class="fas fa-briefcase fa-3x text-muted mb-3 d-block"></i>
                                                         <h5 class="text-muted">Belum Ada Kandidat Offering</h5>
                                                         <p class="text-muted mb-0">Belum ada kandidat yang di-approve ke
                                                             tahap offering</p>
