@@ -91,15 +91,18 @@
                                                     </td>
                                                     <td class="text-center">
                                                         @if ($item->status_rekomendasi == 'rekomendasi')
-                                                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                                            <span class="badge bg-success rounded-pill py-2"
+                                                                style="width: 170px;">
                                                                 <i class="fas fa-check-circle me-1"></i> Rekomendasi
                                                             </span>
                                                         @elseif ($item->status_rekomendasi == 'cadangan')
-                                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                            <span class="badge bg-warning rounded-pill py-2"
+                                                                style="width: 170px;">
                                                                 <i class="fas fa-exclamation-circle me-1"></i> Cadangan
                                                             </span>
                                                         @else
-                                                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                            <span class="badge bg-danger rounded-pill py-2"
+                                                                style="width: 170px;">
                                                                 <i class="fas fa-times-circle me-1"></i> Tidak Rekomendasi
                                                             </span>
                                                         @endif
@@ -189,16 +192,18 @@
                                                     </td>
                                                     <td class="text-center">
                                                         @if ($item->status_rekomendasi == 'rekomendasi')
-                                                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                                            <span class="badge bg-success rounded-pill py-2"
+                                                                style="width: 170px;">
                                                                 <i class="fas fa-check-circle me-1"></i> Rekomendasi
                                                             </span>
                                                         @elseif ($item->status_rekomendasi == 'cadangan')
-                                                            <span
-                                                                class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                            <span class="badge bg-warning rounded-pill py-2"
+                                                                style="width: 170px;">
                                                                 <i class="fas fa-exclamation-circle me-1"></i> Cadangan
                                                             </span>
                                                         @else
-                                                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                            <span class="badge bg-danger rounded-pill py-2"
+                                                                style="width: 170px;">
                                                                 <i class="fas fa-times-circle me-1"></i> Tidak Rekomendasi
                                                             </span>
                                                         @endif
