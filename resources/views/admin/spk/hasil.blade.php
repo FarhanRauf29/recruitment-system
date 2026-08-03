@@ -216,7 +216,8 @@
                                                                     @csrf
                                                                     <input type="hidden" name="metode" value="topsis">
                                                                     <input type="hidden" name="catatan"
-                                                                        value="Lolos berdasarkan perhitungan TOPSIS (Ranking {{ $item->ranking }} - {{ ucfirst($item->status_rekomendasi) }})">
+                                                                        value="Lolos berdasarkan perhitungan TOPSIS (Ranking {{ $item->ranking }})">
+
                                                                     <button type="submit"
                                                                         class="btn btn-sm btn-success rounded-pill px-3"
                                                                         onclick="return confirm('Approve kandidat ini ke tahap offering?')">
