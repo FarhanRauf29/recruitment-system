@@ -481,10 +481,10 @@ class MCU extends Model
 
         $skor = $this->hitungSkorMCU();
 
-        if ($skor >= 95) {
+        if ($skor >= 90) {
             $status = 'Sangat Sehat';
             $keterangan = 'Kondisi kesehatan sangat baik, tidak ada keluhan berarti.';
-        } elseif ($skor >= 85) {
+        } elseif ($skor >= 80) {
             $status = 'Sehat';
             $keterangan = 'Kondisi kesehatan baik, ada beberapa temuan minor.';
         } elseif ($skor >= 70) {

@@ -251,9 +251,9 @@ class MCUController extends Controller
 
     private function getStatusKesehatanBySkor($skor)
     {
-        if ($skor >= 95) {
+        if ($skor >= 90) {
             return 'Sangat Sehat';
-        } elseif ($skor >= 85) {
+        } elseif ($skor >= 80) {
             return 'Sehat';
         } elseif ($skor >= 70) {
             return 'Cukup Sehat';
