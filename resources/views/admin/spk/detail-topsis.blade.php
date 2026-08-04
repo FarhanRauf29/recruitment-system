@@ -126,7 +126,8 @@
                             A⁻ adalah nilai minimum dari setiap kriteria.
                         </div>
 
-                        <h6 class="fw-bold mb-3"><i class="fas fa-chart-line me-2 text-primary"></i> Jarak Solusi Ideal</h6>
+                        <h6 class="fw-bold mb-3"><i class="fas fa-chart-line me-2 text-primary"></i> Perhitungan Jarak
+                            Solusi Ideal</h6>
                         <div class="table-responsive mb-4">
                             <table class="table table-bordered">
                                 <thead class="bg-light">
@@ -137,17 +138,17 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="fw-bold">Jarak Positif (S⁺)</td>
+                                        <td class="fw-bold">Jarak ke Solusi Ideal Positif (D+)</td>
                                         <td class="text-center fw-bold text-primary">
                                             {{ number_format($hasil->detail_perhitungan['jarak_positif'] ?? 0, 4) }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-bold">Jarak Negatif (S⁻)</td>
+                                        <td class="fw-bold">Jarak ke Solusi Ideal Negatif (D-)</td>
                                         <td class="text-center fw-bold text-primary">
                                             {{ number_format($hasil->detail_perhitungan['jarak_negatif'] ?? 0, 4) }}</td>
                                     </tr>
                                     <tr class="table-success">
-                                        <td class="fw-bold">Nilai Preferensi (V)</td>
+                                        <td class="fw-bold">Perhitungan Nilai Preferensi (V)</td>
                                         <td class="text-center fw-bold fs-5">{{ number_format($hasil->nilai_topsis, 4) }}
                                         </td>
                                     </tr>
@@ -158,7 +159,7 @@
                         <div class="alert alert-info rounded-3">
                             <i class="fas fa-calculator me-2"></i>
                             <strong>Rumus Perhitungan TOPSIS:</strong><br>
-                            <code>V = S⁻ / (S⁺ + S⁻)</code><br>
+                            <code>V = D⁻ / (D⁺ + D⁻)</code><br>
                             V = {{ number_format($hasil->detail_perhitungan['jarak_negatif'] ?? 0, 4) }} /
                             ({{ number_format($hasil->detail_perhitungan['jarak_positif'] ?? 0, 4) }} +
                             {{ number_format($hasil->detail_perhitungan['jarak_negatif'] ?? 0, 4) }})<br>
